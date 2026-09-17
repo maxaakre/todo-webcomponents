@@ -23,12 +23,14 @@ A **running, local-first daily todo app built with Lit + TypeScript** — one us
 
 - [How state flows between Lit components](issues/01-lit-state-architecture.md): **Props down, events up, over a plain TypeScript store module that owns `localStorage`** — immutable values throughout. `@lit/context` deferred until prop drilling actually hurts (stable, but scoped to deep trees, and it solves distribution not observation). `@lit-labs/signals` ruled out: Labs 0.3.0, "not recommended for production use", on a Stage 1 TC39 proposal. The store seam, not the transport, is what protects deferred sync.
 
+- [The shape of a Task and a Day in storage](issues/03-domain-data-shape.md): **A Day is derived, not stored** — only Tasks persist, a Day is a filter on `day`. `Task = { id (uuid), title, done, day ("YYYY-MM-DD" label), order (int, renumbered per Day), updatedAt (ISO instant) }`. One `localStorage` key: `"daily-todo/v1" -> { version: 1, tasks: Task[] }`. Drop is a **hard delete**, no tombstones — knowingly sync-hostile, accepted. `day` is a shiftable label; `updatedAt` is an absolute instant; day-start logic must never touch `updatedAt`.
+
 ## Not yet specified
 
 - **Multi-device sync.** The stated direction, deliberately postponed. Revisit once the data shape and persistence layer are settled; the `id` + `updatedAt` decision is the hook it will hang from.
 - **Styling system.** Shadow DOM styling, CSS custom properties as a theming seam, dark mode. Can't be specified until the component seams exist.
 - **History and Backlog views, and routing.** Ruled out of v1 but expected to return. Routing becomes a real decision the moment a second view exists.
-- **Persistence schema evolution.** What happens to stored data when the Task shape changes. Sharpens once the shape is settled.
+- **An "Upcoming" view.** Rescheduled Tasks are invisible until their Day arrives — a Task pushed to Friday cannot be seen anywhere before Friday. Accepted for v1 (see ticket 03). Revisit if Tasks start getting lost in practice; it is really the History/Backlog routing question wearing a different hat.
 - **Keyboard and accessibility.** A daily planner is a keyboard tool. Unclear yet which interactions matter.
 - **Where the app actually runs.** Local dev server forever, or deployed somewhere? Bears on sync later.
 - **Task extras.** Notes, priority, recurrence, estimates. Parked until the minimal Task is used in anger.
