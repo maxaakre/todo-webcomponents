@@ -18,3 +18,9 @@ Cheap to decide now; awkward to retrofit once the store's shape is fixed.
 ## Added after ticket 04
 
 Ticket 04 already commits the app to re-resolving state on **`focus` / `visibilitychange`**. That is the same hook a reload-on-focus answer to multi-tab would use, so much of the cost may already be paid — check before treating tab-awareness as new work.
+
+## Added after ticket 06
+
+Ticket 06 deliberately gave the store **no `subscribe()`**: with one reader, the seam was hypothetical. This ticket is where a genuine second reader would appear. If the answer here needs one, that is the case being made — say so explicitly rather than adding it quietly.
+
+Also settled by 06: `storage.ts` is the only module touching `localStorage`, and the root funnels every change through a single apply-and-save method. Any tab-awareness hangs off those two facts.

@@ -1,7 +1,7 @@
 # 06 — Which custom elements exist, and where are the seams?
 
 Type: grilling
-Status: claimed
+Status: resolved
 Blocked by: 01, 03
 Map: ../map.md
 
@@ -36,3 +36,59 @@ Triage's shape is now decided (variant C, two-pane sorter, non-blocking). Two th
 - The prototype demoed the intended architecture and it held up: **variants never mutated**, they dispatched a `triage-action` verdict and the host applied it. Worth keeping as the pattern for the real elements.
 
 The prototype's own decomposition is on branch `prototype/triage-flow` and is throwaway — do not promote it. It was written under prototype rules: no error handling, no abstractions.
+
+## Answer
+
+### The elements
+
+```
+<daily-todo-app>      root. Owns State, hosts DayController, the ONLY caller of
+ │                    store.ts and storage.ts.
+ ├─ <task-composer>   the input. → task-added { title }
+ ├─ <triage-view>     two-pane. Rendered only while leftovers exist.
+ │   │                Leftover rows are inline markup, not an element.
+ │   │                → task-triaged { id, verdict }
+ │   └─ <task-list>   the right pane — today's plan
+ └─ <task-list>       single column, once nothing is older than today
+                      → task-toggled { id }
+```
+
+`<task-list>` is **one element, always interactive** — no `readonly` property. The prototype's read-only right pane was a shortcut, not a decision: there is no reason to stop someone ticking a Task off during Triage. A boolean that changes behaviour would widen the interface and make the element answer for two modes.
+
+The root swaps between `<triage-view>` and a bare `<task-list>` rather than one element rendering both layouts. Each element then commits to a single layout.
+
+### The plain TypeScript modules (no Lit imports)
+
+- **`store.ts`** — pure operations, `(state, …) => State`. A family of named functions (`addTask`, `toggleTask`, `triage`), **not** a `reduce(state, action)` reducer: the action union would only re-encode the function names, and plain functions read better cold.
+- **`storage.ts`** — `load(): State` and `save(state): void`. **The only module that touches `localStorage`.**
+- **`day.ts`** — `currentDay()`, from ticket 04.
+
+### The persistence seam
+
+Ticket 01 said "the store owns `localStorage`", but pure functions cannot do I/O. Resolved by splitting them: **`store.ts` computes, `storage.ts` persists.**
+
+`storage.ts` is a **real seam, not a hypothetical one** — it gets its second adapter the moment sync arrives, and swapping to IndexedDB or a remote cache touches one file.
+
+The cost is real: the root must `save()` after every change, and forgetting means **silent data loss**. Contain it with a **single funnel** — one private method on `<daily-todo-app>` that applies a store operation, sets state, and saves. Nothing else calls `store.ts` or `storage.ts`, ever.
+
+### Who owns "today"
+
+A **Lit reactive controller**, `DayController`. It owns the `focus`/`visibilitychange` listeners from ticket 04 and exposes the current Day.
+
+Chosen over plain `@state` on the root because the controller makes the **listener lifecycle automatic** — attached on host connect, removed on disconnect, which is exactly the teardown people forget. It is also core Lit that this project had not touched, and ticket 07 wants the same hook, so the seam has two users rather than one.
+
+### Events: specific, not generic
+
+`task-added`, `task-toggled`, `task-triaged` — each with a small `detail`. **Not** one generic `task-action`.
+
+A generic event is the action union in a costume, so choosing it here would contradict the store's shape. Specific events also match the DOM's own vocabulary and read plainly in templates: `@task-triaged=${…}`.
+
+### No `subscribe()`
+
+The store exposes no subscription. With props down / events up there is exactly **one** reader — the root — and *one adapter means a hypothetical seam*. Ticket 07 may produce a genuine second reader (another tab); it can make that case then.
+
+### A note on method
+
+Testability normally settles seam arguments — the interface is the test surface. **Tests are out of scope here**, so that lever was unavailable and these calls rest on **locality** and readability instead.
+
+Two calls came from the **deletion test**: delete `<task-composer>` and input handling (trimming, rejecting empties, clearing, focus) reappears smeared across the root — it earns its keep. Delete `<triage-row>` and nothing reappears; the markup just moves up a level. So the composer is an element and the triage row is not.
