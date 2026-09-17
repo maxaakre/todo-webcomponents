@@ -10,17 +10,17 @@ The app is also a **learning vehicle for Lit and web components**, so idiomatic 
 
 ## Status
 
-**The design is complete. The app is not built yet.**
+**Built and working.**
 
 | | |
 |---|---|
 | Design decisions | **9 of 9 resolved** |
-| Scaffold | ✅ runs |
-| The actual app | ❌ not written |
+| The app | ✅ built, matches the design |
+| Automated tests | none — out of scope |
 
-`src/daily-todo-app.ts` is a **placeholder counter**. It exists to prove the toolchain renders a Lit element and that reactive state re-renders. It is not the app.
+Verified by hand in a browser: triage (move / tomorrow / drop), moved Tasks landing at the bottom, the collapse to single-column, persistence across reload, dark mode, the version and corrupt-payload refusals, and the cross-tab write guard.
 
-Everything below under *How it works* describes the **agreed design**, not shipped behaviour.
+There are **no automated tests** — deliberately out of scope — so treat that verification as a snapshot, not a safety net.
 
 ---
 

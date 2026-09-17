@@ -1,0 +1,46 @@
+/* Page reset and design tokens.
+   index.html sits outside every shadow root, so this is the only place that
+   can reach it. Custom properties are what cross INTO the shadow roots. */
+
+:root {
+  --ink: #16181d;
+  --dim: #6b7280;
+  --line: #e5e7eb;
+  --panel: #f8fafc;
+  --page: #ffffff;
+  --accent: #2563eb;
+  --accent-ink: #ffffff;
+  --danger: #b91c1c;
+
+  --gap-1: 0.35rem;
+  --gap-2: 0.75rem;
+  --gap-3: 1.25rem;
+  --gap-4: 2rem;
+
+  --radius: 10px;
+  --font: -apple-system, system-ui, "Segoe UI", sans-serif;
+
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #e8eaed;
+    --dim: #9aa2b1;
+    --line: #2c313a;
+    --panel: #1a1e24;
+    --page: #121519;
+    --accent: #5b8cff;
+    --accent-ink: #0d1117;
+    --danger: #f87171;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font: 15px/1.5 var(--font);
+}
