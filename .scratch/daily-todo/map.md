@@ -24,6 +24,7 @@ A **running, local-first daily todo app built with Lit + TypeScript** — one us
 - [How state flows between Lit components](issues/01-lit-state-architecture.md): **Props down, events up, over a plain TypeScript store module that owns `localStorage`** — immutable values throughout. `@lit/context` deferred until prop drilling actually hurts (stable, but scoped to deep trees, and it solves distribution not observation). `@lit-labs/signals` ruled out: Labs 0.3.0, "not recommended for production use", on a Stage 1 TC39 proposal. The store seam, not the transport, is what protects deferred sync.
 
 - [The shape of a Task and a Day in storage](issues/03-domain-data-shape.md): **A Day is derived, not stored** — only Tasks persist, a Day is a filter on `day`. `Task = { id (uuid), title, done, day ("YYYY-MM-DD" label), order (int, renumbered per Day), updatedAt (ISO instant) }`. One `localStorage` key: `"daily-todo/v1" -> { version: 1, tasks: Task[] }`. Drop is a **hard delete**, no tombstones — knowingly sync-hostile, accepted. `day` is a shiftable label; `updatedAt` is an absolute instant; day-start logic must never touch `updatedAt`.
+- [Scaffold the Lit + TypeScript project](issues/02-scaffold-project.md): Vite `lit-ts` template. **lit 3.3.3, typescript 6.0.3, vite 8.3.0.** `pnpm dev` on :5173, `pnpm build` = `tsc && vite build`. The load-bearing tsconfig setting is **`useDefineForClassFields: false`** — without it, standard class fields overwrite Lit's `@property`/`@state` accessors and reactivity silently dies. `src/daily-todo-app.ts` is a placeholder counter; ticket 06 owns the real decomposition.
 
 ## Not yet specified
 
@@ -33,6 +34,7 @@ A **running, local-first daily todo app built with Lit + TypeScript** — one us
 - **An "Upcoming" view.** Rescheduled Tasks are invisible until their Day arrives — a Task pushed to Friday cannot be seen anywhere before Friday. Accepted for v1 (see ticket 03). Revisit if Tasks start getting lost in practice; it is really the History/Backlog routing question wearing a different hat.
 - **Keyboard and accessibility.** A daily planner is a keyboard tool. Unclear yet which interactions matter.
 - **Where the app actually runs.** Local dev server forever, or deployed somewhere? Bears on sync later.
+- **Toolchain extras.** TypeScript **7.0.2** is available; the template pins `~6.0.2` and the upgrade was not taken. No linter or formatter was decided either. Neither is blocking.
 - **Task extras.** Notes, priority, recurrence, estimates. Parked until the minimal Task is used in anger.
 
 ## Out of scope
