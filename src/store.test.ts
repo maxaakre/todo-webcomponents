@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addTask, leftovers, tasksForDay, toggleTask, triageTask } from './store.js';
+import { addTask, deleteTask, leftovers, tasksForDay, toggleTask, triageTask } from './store.js';
 import { emptyState } from './model.js';
 import type { State, Task } from './model.js';
 
@@ -109,6 +109,38 @@ describe('toggleTask', () => {
   it('leaves other Tasks alone', () => {
     const state = stateWith([task({ id: 'a' }), task({ id: 'b' })]);
     expect(toggleTask(state, 'a', clock).tasks[1]).toBe(state.tasks[1]);
+  });
+});
+
+describe('deleteTask', () => {
+  it('removes the Task outright — no tombstone', () => {
+    const state = stateWith([task({ id: 'a' }), task({ id: 'b' })]);
+    const next = deleteTask(state, 'a');
+    expect(next.tasks.map((t) => t.id)).toEqual(['b']);
+    expect(next.tasks.some((t) => 'deleted' in t)).toBe(false);
+  });
+
+  it('is a no-op for an unknown id', () => {
+    const state = stateWith([task({ id: 'a' })]);
+    expect(deleteTask(state, 'nope').tasks).toHaveLength(1);
+  });
+
+  it('does not mutate the input state', () => {
+    const state = stateWith([task({ id: 'a' })]);
+    deleteTask(state, 'a');
+    expect(state.tasks).toHaveLength(1);
+  });
+
+  it('leaves order gaps that do not disturb later appends', () => {
+    // order is max+1 within a Day, so a gap is harmless — nothing renumbers.
+    const state = stateWith([
+      task({ id: 'a', order: 0 }),
+      task({ id: 'b', order: 1 }),
+      task({ id: 'c', order: 2 }),
+    ]);
+    const next = addTask(deleteTask(state, 'b'), 'new one', clock);
+    expect(next.tasks.at(-1)!.order).toBe(3);
+    expect(tasksForDay(next, clock.today).map((t) => t.id)).toEqual(['a', 'c', next.tasks.at(-1)!.id]);
   });
 });
 

@@ -14,9 +14,16 @@ export class TaskList extends LitElement {
       padding: 0.55rem 0; border-bottom: 1px solid var(--line);
     }
     li:last-child { border-bottom: 0; }
+    span { flex: 1; }
     li.done span { text-decoration: line-through; color: var(--dim); }
     input { width: 1rem; height: 1rem; accent-color: var(--accent); cursor: pointer; }
     p { color: var(--dim); margin: 0; padding: var(--gap-3) 0; }
+    button {
+      font: inherit; line-height: 1; cursor: pointer;
+      border: 1px solid transparent; background: none; color: var(--dim);
+      border-radius: 7px; padding: 0.15rem 0.4rem;
+    }
+    button:hover, button:focus-visible { color: var(--danger); border-color: var(--line); }
   `;
 
   @property({ attribute: false }) tasks: Task[] = [];
@@ -24,6 +31,12 @@ export class TaskList extends LitElement {
 
   private toggle(id: string) {
     this.dispatchEvent(new CustomEvent('task-toggled', {
+      detail: { id }, bubbles: true, composed: true,
+    }));
+  }
+
+  private requestDelete(id: string) {
+    this.dispatchEvent(new CustomEvent('task-deleted', {
       detail: { id }, bubbles: true, composed: true,
     }));
   }
@@ -36,6 +49,8 @@ export class TaskList extends LitElement {
                @change=${() => this.toggle(t.id)}
                aria-label=${t.title} />
         <span>${t.title}</span>
+        <button @click=${() => this.requestDelete(t.id)}
+                title="Delete" aria-label=${`Delete "${t.title}"`}>&#10005;</button>
       </li>`)}</ul>`;
   }
 }

@@ -16,7 +16,7 @@ The app is also a **learning vehicle for Lit and web components**, so idiomatic 
 |---|---|
 | Design decisions | **9 of 9 resolved** |
 | The app | ✅ built, matches the design |
-| Tests | ✅ **50 passing** |
+| Tests | ✅ **56 passing** |
 
 Also verified by hand in a browser: dark mode, and the full triage flow end to end.
 
@@ -69,6 +69,8 @@ Defined properly in [`CONTEXT.md`](./CONTEXT.md). In short:
 
 Tasks moved into today land at the **bottom** of the plan — what you chose deliberately keeps its place.
 
+A Task can also be **deleted outright** from the list with the ✕ button. Like Drop, this is a **hard delete with no undo** — nothing is archived and nothing can be recovered.
+
 ### Storage
 
 Everything lives in `localStorage` under **one key**:
@@ -110,6 +112,7 @@ A **Day is derived, not stored** — it is just a filter on `day`, so the two ca
  ├─ <triage-view>     two-pane         → task-triaged { id, verdict }
  │   └─ <task-list>   right pane
  └─ <task-list>       single column    → task-toggled { id }
+                                       → task-deleted { id }
 ```
 
 **Props down, events up.** No `@lit/context`, no signals. Child elements never mutate state — they dispatch a verdict and the root applies it.
@@ -167,12 +170,12 @@ Two throwaway branches hold primary sources. Neither is merged, by design — `m
 
 ## Tests
 
-`pnpm test` — **50 tests**, Vitest with happy-dom.
+`pnpm test` — **56 tests**, Vitest with happy-dom.
 
 They concentrate on the places that fail **silently**:
 
 - `day.test.ts` — that `currentDay()` is **local time, not UTC**, plus month, year and leap-day boundaries
-- `store.test.ts` — the leftovers filter across multiple earlier Days, bottom-ordering on a move, hard delete, immutability
+- `store.test.ts` — the leftovers filter across multiple earlier Days, bottom-ordering on a move, hard delete (both paths), immutability
 - `storage.test.ts` — the version and corrupt refusals leaving data **byte-identical**, and the cross-tab write guard
 - `elements.test.ts` — the two-pane/single-column switch, the composer, and the error screen, driven through the real elements
 

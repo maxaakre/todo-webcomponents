@@ -35,6 +35,11 @@ export function addTask(state: State, title: string, clock: Clock): State {
   return { ...state, tasks: [...state.tasks, task] };
 }
 
+/** Hard delete. No tombstone — the same choice `drop` makes (ticket 03). */
+export function deleteTask(state: State, id: string): State {
+  return { ...state, tasks: state.tasks.filter((t) => t.id !== id) };
+}
+
 export function toggleTask(state: State, id: string, clock: Clock): State {
   return {
     ...state,
@@ -45,10 +50,7 @@ export function toggleTask(state: State, id: string, clock: Clock): State {
 }
 
 export function triageTask(state: State, id: string, verdict: Verdict, clock: Clock): State {
-  if (verdict === 'drop') {
-    // Hard delete. No tombstone — a knowingly sync-hostile choice (ticket 03).
-    return { ...state, tasks: state.tasks.filter((t) => t.id !== id) };
-  }
+  if (verdict === 'drop') return deleteTask(state, id);
   const day = verdict === 'today' ? clock.today : addDays(clock.today, 1);
   const order = nextOrder(state, day);
   return {

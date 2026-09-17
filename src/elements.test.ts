@@ -81,6 +81,29 @@ describe('<daily-todo-app>', () => {
     expect(stored().tasks[0].done).toBe(true);
   });
 
+  it('deletes a Task from the Today list', async () => {
+    localStorage.setItem(KEY, JSON.stringify({ version: 1, tasks: [
+      { id: 'a', title: 'Typo task', done: false, day: currentDay(), order: 0, updatedAt: '2026-01-01T00:00:00.000Z' },
+      { id: 'b', title: 'Keep me', done: false, day: currentDay(), order: 1, updatedAt: '2026-01-01T00:00:00.000Z' },
+    ]}));
+    const app = await mount();
+    const list = app.shadowRoot!.querySelector('task-list') as TaskList;
+    await list.updateComplete;
+    (list.shadowRoot!.querySelectorAll('button')[0] as HTMLButtonElement).click();
+    await settle(app);
+    expect(stored().tasks.map((t: { id: string }) => t.id)).toEqual(['b']);
+  });
+
+  it('the delete button is labelled for screen readers', async () => {
+    localStorage.setItem(KEY, JSON.stringify({ version: 1, tasks: [
+      { id: 'a', title: 'Buy oat milk', done: false, day: currentDay(), order: 0, updatedAt: '2026-01-01T00:00:00.000Z' },
+    ]}));
+    const app = await mount();
+    const list = app.shadowRoot!.querySelector('task-list') as TaskList;
+    await list.updateComplete;
+    expect(list.shadowRoot!.querySelector('button')!.getAttribute('aria-label')).toBe('Delete "Buy oat milk"');
+  });
+
   it('triages a leftover to today, landing it at the bottom of the plan', async () => {
     localStorage.setItem(KEY, JSON.stringify({ version: 1, tasks: [
       { id: 'planned', title: 'Planned', done: false, day: currentDay(), order: 0, updatedAt: '2026-01-01T00:00:00.000Z' },
