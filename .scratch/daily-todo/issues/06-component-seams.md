@@ -21,3 +21,9 @@ Depends on 01 (how state flows) and 03 (what the data is). Consult `mattpocock-s
 Ticket 01 is **resolved** and already fixes part of this: props down / events up, with a plain TypeScript store module owning `localStorage` and returning immutable values. What remains for this ticket is the element decomposition and the store's exact public interface.
 
 One question 01 surfaced explicitly: **does the store expose a `subscribe()`, or is the root component its only reader?** A single reader is simpler and enough for v1, but a subscription is what a sync client — or another tab (ticket 07) — would later push into. It is the difference between adding a method and rewiring.
+
+## Added after ticket 04
+
+Ticket 04 made **the current Day runtime state**: it re-resolves on `focus`/`visibilitychange` and can change mid-session. This ticket must say **who owns it** — the root element, the store module, or a reactive controller — and how a change propagates to the view and triggers Triage.
+
+A Lit **reactive controller** is the idiomatic answer to "a bit of state driven by browser events" and is worth evaluating here, since it is a core Lit concept the project has not otherwise touched.

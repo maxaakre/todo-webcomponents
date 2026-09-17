@@ -14,3 +14,7 @@ Surfaced by the state-architecture research: **multi-tab is an unplanned mini-sy
 - Does this change the store module's interface (a `subscribe()`, a reload-on-focus), or is it purely a behaviour question?
 
 Cheap to decide now; awkward to retrofit once the store's shape is fixed.
+
+## Added after ticket 04
+
+Ticket 04 already commits the app to re-resolving state on **`focus` / `visibilitychange`**. That is the same hook a reload-on-focus answer to multi-tab would use, so much of the cost may already be paid — check before treating tab-awareness as new work.
