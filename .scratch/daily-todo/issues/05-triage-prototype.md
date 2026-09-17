@@ -1,7 +1,7 @@
 # 05 — Prototype the Triage flow
 
 Type: prototype
-Status: open
+Status: claimed
 Blocked by: 02, 03, 04
 Map: ../map.md
 
