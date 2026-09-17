@@ -1,7 +1,7 @@
 # 07 — What happens when two tabs are open?
 
 Type: grilling
-Status: open
+Status: claimed
 Blocked by: 03
 Map: ../map.md
 
