@@ -15,3 +15,7 @@ Graduated from the fog by ticket 03, which put a `version: 1` field in the store
 - Does a malformed or unparseable payload take the same path as a version mismatch, or a different one?
 
 Small, but it is the difference between a silent data loss and a deliberate one. Cheap to decide before there is anything to lose.
+
+## Added after ticket 07
+
+`load()` now does two jobs: it returns `State` **and** retains the raw string it read for the write guard. Whatever this ticket decides about an unrecognised `version` has to say what the retained string is after a wipe or a refusal — otherwise the guard compares against something that was never really loaded.

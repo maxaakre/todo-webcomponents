@@ -92,3 +92,10 @@ The store exposes no subscription. With props down / events up there is exactly 
 Testability normally settles seam arguments — the interface is the test surface. **Tests are out of scope here**, so that lever was unavailable and these calls rest on **locality** and readability instead.
 
 Two calls came from the **deletion test**: delete `<task-composer>` and input handling (trimming, rejecting empties, clearing, focus) reappears smeared across the root — it earns its keep. Delete `<triage-row>` and nothing reappears; the markup just moves up a level. So the composer is an element and the triage row is not.
+
+## Addendum (from ticket 07)
+
+`storage.ts` grew slightly, and both changes are part of its **interface**, not hidden inside it:
+
+- **`load()` keeps the raw string it read**, for the write guard to compare against.
+- **`save()` can fail** — when another tab changed the document first. The root's single apply-and-save funnel must handle that failure: reload, and tell the user the action did not apply. A funnel that ignores the return value reintroduces exactly the silent loss the guard exists to prevent.
