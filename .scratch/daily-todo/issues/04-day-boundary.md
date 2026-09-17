@@ -1,7 +1,7 @@
 # 04 — When does a Day end?
 
 Type: grilling
-Status: open
+Status: claimed
 Blocked by: 03
 Map: ../map.md
 
