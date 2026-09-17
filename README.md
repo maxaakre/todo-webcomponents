@@ -16,11 +16,9 @@ The app is also a **learning vehicle for Lit and web components**, so idiomatic 
 |---|---|
 | Design decisions | **9 of 9 resolved** |
 | The app | ✅ built, matches the design |
-| Automated tests | none — out of scope |
+| Tests | ✅ **50 passing** |
 
-Verified by hand in a browser: triage (move / tomorrow / drop), moved Tasks landing at the bottom, the collapse to single-column, persistence across reload, dark mode, the version and corrupt-payload refusals, and the cross-tab write guard.
-
-There are **no automated tests** — deliberately out of scope — so treat that verification as a snapshot, not a safety net.
+Also verified by hand in a browser: dark mode, and the full triage flow end to end.
 
 ---
 
@@ -42,6 +40,8 @@ Then open **http://localhost:5173/**.
 | `pnpm dev` | Dev server with hot reload |
 | `pnpm build` | Typecheck (`tsc`) then bundle (`vite build`) |
 | `pnpm preview` | Serve the production build locally |
+| `pnpm test` | Run the test suite once |
+| `pnpm test:watch` | Run tests in watch mode |
 
 ### Versions
 
@@ -165,8 +165,21 @@ Two throwaway branches hold primary sources. Neither is merged, by design — `m
 - **`prototype/triage-flow`** — the three Triage designs that were compared before picking the two-pane sorter. Run with `pnpm prototype`.
 - **`research/lit-state-architecture`** — the cited report behind the props-down/events-up choice.
 
+## Tests
+
+`pnpm test` — **50 tests**, Vitest with happy-dom.
+
+They concentrate on the places that fail **silently**:
+
+- `day.test.ts` — that `currentDay()` is **local time, not UTC**, plus month, year and leap-day boundaries
+- `store.test.ts` — the leftovers filter across multiple earlier Days, bottom-ordering on a move, hard delete, immutability
+- `storage.test.ts` — the version and corrupt refusals leaving data **byte-identical**, and the cross-tab write guard
+- `elements.test.ts` — the two-pane/single-column switch, the composer, and the error screen, driven through the real elements
+
+The suite was **mutation-checked**: making a moved Task land at the top, switching `currentDay()` to UTC, wiping on a version mismatch, and removing the write guard each produced failures. It is not a suite that passes regardless.
+
 ### Deliberately out of scope
 
-**Multi-user and accounts**, and **automated tests**.
+**Multi-user and accounts.**
 
 Parked for later: multi-device sync, History and Backlog views, routing, keyboard and accessibility, deployment.

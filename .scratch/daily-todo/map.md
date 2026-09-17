@@ -12,7 +12,7 @@ A **running, local-first daily todo app built with Lit + TypeScript** — one us
 - **Purpose is learning.** The user is learning Lit and web components. Prefer idiomatic, well-understood Lit patterns over clever ones; explain the Lit concept in play when resolving a ticket.
 - **Skills every session should consult**: `mattpocock-skills:grilling` and `mattpocock-skills:domain-modeling`. Research tickets use `mattpocock-skills:research`; prototype tickets use `mattpocock-skills:prototype`.
 - **Stack is fixed**: Lit, TypeScript, Vite, `localStorage`.
-- **No automated tests in this effort.** Explicitly ruled out by the user (see Out of scope). Do not add a test suite.
+- **Automated tests are in scope**, as of 2026-09-17. They were ruled out while the map was charted and the user reversed that after the app was built. Vitest + happy-dom; `pnpm test`. The suite is mutation-checked — see the commit that added it.
 - **Sync is deferred, not dropped.** Every Task carries a stable `id` and an `updatedAt` timestamp so multi-device sync stays possible without a rewrite.
 - **Immutable updates are mandatory.** Lit's change detection is strict `!==`; mutating an array or object re-renders nothing, and fails silently. Always replace, never mutate. (From the state-architecture research.)
 - **Planning, not building.** Tickets resolve decisions. The one exception is the scaffold task, which exists to unblock the prototype.
@@ -45,4 +45,3 @@ A **running, local-first daily todo app built with Lit + TypeScript** — one us
 ## Out of scope
 
 - **Multi-user, accounts, and auth.** The destination is one person's daily plan. Multi-*device* is in the fog; multi-*user* is past the destination.
-- **Automated tests.** Ruled out by the user (Q12). Returns only if the destination is redrawn.
