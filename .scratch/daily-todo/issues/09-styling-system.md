@@ -1,7 +1,7 @@
 # 09 — How is the app styled?
 
 Type: grilling
-Status: open
+Status: claimed
 Blocked by: —
 Map: ../map.md
 

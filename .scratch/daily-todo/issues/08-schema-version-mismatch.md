@@ -1,7 +1,7 @@
 # 08 — What happens when stored data doesn't match the current version?
 
 Type: grilling
-Status: open
+Status: claimed
 Blocked by: —
 Map: ../map.md
 
