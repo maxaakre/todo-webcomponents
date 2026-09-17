@@ -1,7 +1,7 @@
 # 06 — Which custom elements exist, and where are the seams?
 
 Type: grilling
-Status: open
+Status: claimed
 Blocked by: 01, 03
 Map: ../map.md
 
