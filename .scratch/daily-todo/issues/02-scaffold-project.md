@@ -17,3 +17,7 @@ Stand up a working Vite + TypeScript + Lit project in this repo:
 - No test tooling (ruled out — see the map's Out of scope)
 
 Record in the answer: the **exact versions installed**, the **dev command**, and any tsconfig setting that was non-obvious, since later tickets will depend on knowing them.
+
+## Added after ticket 01
+
+Install **no state library** — not `@lit/context`, not `@lit-labs/signals`. Ticket 01 settled on props down / events up over a plain TypeScript store module. Current stable core is `lit@3.3.3`; verify before installing.

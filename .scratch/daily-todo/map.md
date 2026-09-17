@@ -14,13 +14,14 @@ A **running, local-first daily todo app built with Lit + TypeScript** — one us
 - **Stack is fixed**: Lit, TypeScript, Vite, `localStorage`.
 - **No automated tests in this effort.** Explicitly ruled out by the user (see Out of scope). Do not add a test suite.
 - **Sync is deferred, not dropped.** Every Task carries a stable `id` and an `updatedAt` timestamp so multi-device sync stays possible without a rewrite.
+- **Immutable updates are mandatory.** Lit's change detection is strict `!==`; mutating an array or object re-renders nothing, and fails silently. Always replace, never mutate. (From the state-architecture research.)
 - **Planning, not building.** Tickets resolve decisions. The one exception is the scaffold task, which exists to unblock the prototype.
 
 ## Decisions so far
 
 <!-- one line per closed ticket: gist + link -->
 
-_(none yet — the map was just charted)_
+- [How state flows between Lit components](issues/01-lit-state-architecture.md): **Props down, events up, over a plain TypeScript store module that owns `localStorage`** — immutable values throughout. `@lit/context` deferred until prop drilling actually hurts (stable, but scoped to deep trees, and it solves distribution not observation). `@lit-labs/signals` ruled out: Labs 0.3.0, "not recommended for production use", on a Stage 1 TC39 proposal. The store seam, not the transport, is what protects deferred sync.
 
 ## Not yet specified
 

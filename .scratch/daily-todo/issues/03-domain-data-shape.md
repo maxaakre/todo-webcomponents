@@ -18,3 +18,8 @@ Open sub-decisions:
 - What is the single `localStorage` key, and what is the top-level shape under it?
 
 The glossary in `CONTEXT.md` names the terms. This ticket pins down their representation.
+
+## Added after ticket 01
+
+- The store is a **plain TypeScript module with no Lit imports**, exposing immutable operations that return new values. This ticket defines the values it returns.
+- Ticket 01 raised a collision to settle here: is `updatedAt` an **absolute instant** (wall clock at write) while `Day` is a **label**? `CONTEXT.md` defines Today as `currentDay()`, deliberately not the calendar date — so the two must not be conflated. Coordinate with ticket 04.

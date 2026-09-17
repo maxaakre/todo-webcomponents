@@ -16,3 +16,7 @@ What remains open:
 - What triggers **Triage** exactly: any unfinished Task on any earlier Day, or only the immediately preceding Day?
 - Does **reschedule** allow any future Day, or only tomorrow?
 - Timezone changes and clock skew — ignored, or handled?
+
+## Added after ticket 01
+
+Ticket 01 flagged that `updatedAt` (for future sync) and `Day` (shiftable by a day-start setting) are different kinds of time. Be explicit: `updatedAt` is an absolute instant, `Day` is a label. Otherwise this ticket collides with 03.
