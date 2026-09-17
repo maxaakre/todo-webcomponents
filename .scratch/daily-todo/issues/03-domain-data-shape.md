@@ -63,3 +63,9 @@ Every write is atomic, the whole state is one `JSON.parse`, and **`version`** is
 ### Accepted risk
 
 Rescheduled Tasks are **invisible until their Day arrives**. Today shows `day === today`; a Task pushed to Friday cannot be seen anywhere before Friday. Accepted for v1 — an "Upcoming" peek is a second view wearing a disguise, and views are out of v1 scope. Recorded in the map's fog; revisit if Tasks start getting lost.
+
+## Addendum (from ticket 05)
+
+The prototype exposed a gap this ticket left: `order` is renumbered per Day, but nothing said **where a Task moved by Triage lands** in the destination Day. Inheriting its old number made leftovers jump ahead of work already planned for today.
+
+**A moved Task goes to the bottom** — `order` = max order in the destination Day, plus one. Today's plan was chosen deliberately; a Task already deferred once has not earned the top slot. Where a batch is moved, their relative order among themselves is preserved.
