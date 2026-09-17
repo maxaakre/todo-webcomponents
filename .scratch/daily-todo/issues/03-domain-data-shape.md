@@ -1,7 +1,7 @@
 # 03 — The shape of a Task and a Day in storage
 
 Type: grilling
-Status: open
+Status: claimed
 Blocked by: —
 Map: ../map.md
 
