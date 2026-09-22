@@ -18,3 +18,14 @@ Hosting is fixed as **Vercel**, which constrains but does not decide this:
 - Cost of reversal: how much of the design is provider-shaped, and how much is portable?
 
 Judge against provider documentation and current pricing pages, not recollection.
+
+## Comments
+
+**2026-09-22, from ticket 06.** The identity decision lands a hard constraint here: **WebAuthn verification on a stateless function.**
+
+The backend must be able to:
+- Generate and hold a **challenge** across a two-request ceremony, with a short TTL. Serverless functions keep no state between invocations, so this needs storage, not a variable.
+- **Verify a signature** — a WebAuthn server library that runs in whatever runtime is chosen (Node vs Edge matters here).
+- Store **public keys and a user handle**, persistently.
+
+What it does **not** need, thanks to ticket 06's revoke-all decision: any device-management API, device naming, or per-credential listing.
