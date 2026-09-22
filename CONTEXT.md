@@ -37,3 +37,7 @@ What the `×` on a Task means: **this should never have existed** — a typo, a 
 ## Erased
 
 The state of a Task that was erased. Unlike **done** and **abandoned**, it is not an outcome — it is a claim that the Task never counted.
+
+## Device
+
+One place the user runs the app — their laptop, their phone. A Device has its own clock, its own idea of which Day is **Today**, and its own copy of the Tasks. Devices belong to one person; there is no notion of another person's Device.

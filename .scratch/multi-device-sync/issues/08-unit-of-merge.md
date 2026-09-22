@@ -23,3 +23,11 @@ Ticket 05 decides which clock this rule may trust. Do not settle this before it.
 **Treat this as a strong steer, not a resolution.** This ticket is blocked by ticket 05 for a reason: per-Task LWW names the *unit* but not the *clock*, and LWW on untrusted device clocks is not a design — a phone running fast wins every conflict, permanently and silently. Settle 05 first, then confirm or qualify this.
 
 Also still open here: whether a discarded write may be silent (the charting recommendation was **no** — `storage.ts` already tells the user when it refuses a write), whether abandonment merges by the same rule or wins outright (see the note on ticket 04), and whether an offline week replays as a queue of operations or pushes one final state.
+
+**2026-09-22, ticket 05 resolved — this ticket is now unblocked.** Constraints it hands over:
+
+- **Device `updatedAt` decides**, with a server guard that rejects only **future-dated** writes (a few minutes' tolerance). Old writes are never rejected — that is what an offline queue looks like.
+- The server returns **its own time** on each response so the client can warn about its own clock drift in either direction.
+- **Ties break on device id**, higher wins, computable offline by both sides.
+- Rejection over clamping, which matches this ticket's open question about whether a discarded write may be silent. Ticket 05 has already answered "no" once; be consistent.
+- From ticket 04: abandoning and erasing **must set `updatedAt`**, and since the UI has no un-drop, **any resurrection is by definition a merge bug**.

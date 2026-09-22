@@ -16,3 +16,16 @@ The map admits auth as **"one secret, one person"** — not accounts. Settled wh
 - Revocation is fog for now, but do **not** pick a mechanism that makes revoking a lost phone impossible.
 
 Out of scope: accounts, sign-up, passwords, OAuth providers.
+
+## Comments
+
+**2026-09-22, from ticket 05.** This ticket's output is now **load-bearing for merging, not just for auth.**
+
+Ticket 05 breaks a merge tie — two writes sharing an `updatedAt` millisecond — by **comparing device ids, higher wins**. It is the only tiebreaker both devices can compute while offline without asking the server.
+
+So whatever mechanism is chosen here must produce an id that is:
+- **Stable** for the life of the device — if it changes, a device can lose a tie against its own earlier self.
+- **Comparable** — an ordering both devices agree on.
+- **Present before the first sync**, since a merge can need it offline.
+
+A passkey credential id and a random token both satisfy this; it is worth checking rather than assuming.
