@@ -35,8 +35,8 @@ export class TaskList extends LitElement {
     }));
   }
 
-  private requestDelete(id: string) {
-    this.dispatchEvent(new CustomEvent('task-deleted', {
+  private requestErase(id: string) {
+    this.dispatchEvent(new CustomEvent('task-erased', {
       detail: { id }, bubbles: true, composed: true,
     }));
   }
@@ -44,13 +44,13 @@ export class TaskList extends LitElement {
   render() {
     if (!this.tasks.length) return html`<p>${this.empty}</p>`;
     return html`<ul>${this.tasks.map((t) => html`
-      <li class=${t.done ? 'done' : ''}>
-        <input type="checkbox" .checked=${t.done}
+      <li class=${t.status === 'done' ? 'done' : ''}>
+        <input type="checkbox" .checked=${t.status === 'done'}
                @change=${() => this.toggle(t.id)}
                aria-label=${t.title} />
         <span>${t.title}</span>
-        <button @click=${() => this.requestDelete(t.id)}
-                title="Delete" aria-label=${`Delete "${t.title}"`}>&#10005;</button>
+        <button @click=${() => this.requestErase(t.id)}
+                title="Erase" aria-label=${`Erase "${t.title}"`}>&#10005;</button>
       </li>`)}</ul>`;
   }
 }

@@ -5,7 +5,7 @@ import './task-list.js';
 import './triage-view.js';
 import { DayController } from './day-controller.js';
 import { makeClock } from './day.js';
-import { addTask, deleteTask, leftovers, tasksForDay, toggleTask, triageTask } from './store.js';
+import { addTask, eraseTask, leftovers, tasksForDay, toggleTask, triageTask } from './store.js';
 import * as storage from './storage.js';
 import { emptyState } from './model.js';
 import type { State, Verdict } from './model.js';
@@ -115,11 +115,11 @@ export class DailyTodoApp extends LitElement {
         ? html`<triage-view
               .leftovers=${stale} .todays=${todays} .today=${today}
               @task-triaged=${this.onTriaged} @task-toggled=${this.onToggled}
-              @task-deleted=${this.onDeleted}
+              @task-erased=${this.onErased}
             ></triage-view>`
         : html`<task-list
               .tasks=${todays} @task-toggled=${this.onToggled}
-              @task-deleted=${this.onDeleted}
+              @task-erased=${this.onErased}
             ></task-list>`}`;
   }
 
@@ -129,8 +129,8 @@ export class DailyTodoApp extends LitElement {
   private onToggled = (e: CustomEvent<{ id: string }>) =>
     this.apply((s) => toggleTask(s, e.detail.id, makeClock()));
 
-  private onDeleted = (e: CustomEvent<{ id: string }>) =>
-    this.apply((s) => deleteTask(s, e.detail.id));
+  private onErased = (e: CustomEvent<{ id: string }>) =>
+    this.apply((s) => eraseTask(s, e.detail.id, makeClock()));
 
   private onTriaged = (e: CustomEvent<{ id: string; verdict: Verdict }>) =>
     this.apply((s) => triageTask(s, e.detail.id, e.detail.verdict, makeClock()));

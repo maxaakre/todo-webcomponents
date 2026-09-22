@@ -37,8 +37,8 @@ describe('<daily-todo-app>', () => {
   });
 
   it('switches to the two-pane view when something is older than today', async () => {
-    localStorage.setItem(KEY, JSON.stringify({ version: 1, tasks: [
-      { id: 'a', title: 'Renew passport', done: false, day: '2020-01-01', order: 0, updatedAt: '2020-01-01T00:00:00.000Z' },
+    localStorage.setItem(KEY, JSON.stringify({ version: 2, tasks: [
+      { id: 'a', title: 'Renew passport', status: 'open', day: '2020-01-01', order: 0, updatedAt: '2020-01-01T00:00:00.000Z' },
     ]}));
     const app = await mount();
     expect(app.shadowRoot!.querySelector('triage-view')).not.toBeNull();
@@ -70,44 +70,47 @@ describe('<daily-todo-app>', () => {
   });
 
   it('toggles a Task from the list', async () => {
-    localStorage.setItem(KEY, JSON.stringify({ version: 1, tasks: [
-      { id: 'a', title: 'Buy oat milk', done: false, day: currentDay(), order: 0, updatedAt: '2026-01-01T00:00:00.000Z' },
+    localStorage.setItem(KEY, JSON.stringify({ version: 2, tasks: [
+      { id: 'a', title: 'Buy oat milk', status: 'open', day: currentDay(), order: 0, updatedAt: '2026-01-01T00:00:00.000Z' },
     ]}));
     const app = await mount();
     const list = app.shadowRoot!.querySelector('task-list') as TaskList;
     await list.updateComplete;
     (list.shadowRoot!.querySelector('input[type=checkbox]') as HTMLInputElement).dispatchEvent(new Event('change'));
     await settle(app);
-    expect(stored().tasks[0].done).toBe(true);
+    expect(stored().tasks[0].status).toBe('done');
   });
 
-  it('deletes a Task from the Today list', async () => {
-    localStorage.setItem(KEY, JSON.stringify({ version: 1, tasks: [
-      { id: 'a', title: 'Typo task', done: false, day: currentDay(), order: 0, updatedAt: '2026-01-01T00:00:00.000Z' },
-      { id: 'b', title: 'Keep me', done: false, day: currentDay(), order: 1, updatedAt: '2026-01-01T00:00:00.000Z' },
+  it('× ERASES a Task — the row survives, but it leaves the list', async () => {
+    localStorage.setItem(KEY, JSON.stringify({ version: 2, tasks: [
+      { id: 'a', title: 'Typo task', status: 'open', day: currentDay(), order: 0, updatedAt: '2026-01-01T00:00:00.000Z' },
+      { id: 'b', title: 'Keep me', status: 'open', day: currentDay(), order: 1, updatedAt: '2026-01-01T00:00:00.000Z' },
     ]}));
     const app = await mount();
     const list = app.shadowRoot!.querySelector('task-list') as TaskList;
     await list.updateComplete;
     (list.shadowRoot!.querySelectorAll('button')[0] as HTMLButtonElement).click();
     await settle(app);
-    expect(stored().tasks.map((t: { id: string }) => t.id)).toEqual(['b']);
+    const rows = stored().tasks as { id: string; status: string }[];
+    expect(rows.map((t) => t.id)).toEqual(['a', 'b']);
+    expect(rows.find((t) => t.id === 'a')!.status).toBe('erased');
+    expect(list.shadowRoot!.querySelectorAll('li')).toHaveLength(1);
   });
 
-  it('the delete button is labelled for screen readers', async () => {
-    localStorage.setItem(KEY, JSON.stringify({ version: 1, tasks: [
-      { id: 'a', title: 'Buy oat milk', done: false, day: currentDay(), order: 0, updatedAt: '2026-01-01T00:00:00.000Z' },
+  it('the erase button is labelled for screen readers', async () => {
+    localStorage.setItem(KEY, JSON.stringify({ version: 2, tasks: [
+      { id: 'a', title: 'Buy oat milk', status: 'open', day: currentDay(), order: 0, updatedAt: '2026-01-01T00:00:00.000Z' },
     ]}));
     const app = await mount();
     const list = app.shadowRoot!.querySelector('task-list') as TaskList;
     await list.updateComplete;
-    expect(list.shadowRoot!.querySelector('button')!.getAttribute('aria-label')).toBe('Delete "Buy oat milk"');
+    expect(list.shadowRoot!.querySelector('button')!.getAttribute('aria-label')).toBe('Erase "Buy oat milk"');
   });
 
   it('triages a leftover to today, landing it at the bottom of the plan', async () => {
-    localStorage.setItem(KEY, JSON.stringify({ version: 1, tasks: [
-      { id: 'planned', title: 'Planned', done: false, day: currentDay(), order: 0, updatedAt: '2026-01-01T00:00:00.000Z' },
-      { id: 'old', title: 'Leftover', done: false, day: '2020-01-01', order: 0, updatedAt: '2020-01-01T00:00:00.000Z' },
+    localStorage.setItem(KEY, JSON.stringify({ version: 2, tasks: [
+      { id: 'planned', title: 'Planned', status: 'open', day: currentDay(), order: 0, updatedAt: '2026-01-01T00:00:00.000Z' },
+      { id: 'old', title: 'Leftover', status: 'open', day: '2020-01-01', order: 0, updatedAt: '2020-01-01T00:00:00.000Z' },
     ]}));
     const app = await mount();
     const triage = app.shadowRoot!.querySelector('triage-view') as TriageView;
@@ -141,16 +144,16 @@ describe('<daily-todo-app>', () => {
     await settle(app);
 
     expect(app.shadowRoot!.querySelector('.error')).toBeNull();
-    expect(stored()).toEqual({ version: 1, tasks: [] });
+    expect(stored()).toEqual({ version: 2, tasks: [] });
   });
 
   it('discards a write that would clobber another tab, and says so', async () => {
-    localStorage.setItem(KEY, JSON.stringify({ version: 1, tasks: [] }));
+    localStorage.setItem(KEY, JSON.stringify({ version: 2, tasks: [] }));
     const app = await mount();
 
     // Another tab writes directly, bypassing storage.ts.
-    const otherTab = JSON.stringify({ version: 1, tasks: [
-      { id: 'other', title: 'From another tab', done: false, day: currentDay(), order: 0, updatedAt: '2026-01-01T00:00:00.000Z' },
+    const otherTab = JSON.stringify({ version: 2, tasks: [
+      { id: 'other', title: 'From another tab', status: 'open', day: currentDay(), order: 0, updatedAt: '2026-01-01T00:00:00.000Z' },
     ]});
     localStorage.setItem(KEY, otherTab);
 

@@ -6,6 +6,7 @@
  *  - A save will not overwrite a document another tab changed underneath it.
  */
 import { CURRENT_VERSION, emptyState } from './model.js';
+import { migrate } from './migrate.js';
 import type { State } from './model.js';
 
 const KEY = 'daily-todo/v1';
@@ -44,19 +45,21 @@ export function load(): LoadResult {
     };
   }
 
-  const doc = parsed as Partial<State>;
-  if (doc?.version !== CURRENT_VERSION) {
+  const upgraded = migrate(parsed);
+  if (!upgraded.ok) {
     loaded = false;
     return {
       ok: false,
       reason: 'version',
-      message: `Saved data is version ${String(doc?.version)}, and this build only understands version ${CURRENT_VERSION}. It has been left untouched.`,
+      message: `Saved data is version ${String(upgraded.found)}, and this build only understands version ${CURRENT_VERSION}. It has been left untouched.`,
     };
   }
 
+  // `lastRaw` is the bytes we READ, not what we migrated them into: reading
+  // never writes, and the guard must compare against what is actually on disk.
   lastRaw = raw;
   loaded = true;
-  return { ok: true, state: { version: CURRENT_VERSION, tasks: doc.tasks ?? [] } };
+  return { ok: true, state: upgraded.state };
 }
 
 export function save(state: State): SaveResult {

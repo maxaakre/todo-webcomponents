@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { addTask, deleteTask, leftovers, tasksForDay, toggleTask, triageTask } from './store.js';
+import { abandonTask, addTask, eraseTask, leftovers, tasksForDay, toggleTask, triageTask } from './store.js';
 import { emptyState } from './model.js';
 import type { State, Task } from './model.js';
 
 const clock = { today: '2026-09-17', now: '2026-09-17T09:00:00.000Z' };
 
 const task = (over: Partial<Task>): Task => ({
-  id: 'x', title: 't', done: false, day: '2026-09-17', order: 0,
+  id: 'x', title: 't', status: 'open', day: '2026-09-17', order: 0,
   updatedAt: '2026-09-01T00:00:00.000Z', ...over,
 });
 
@@ -16,7 +16,7 @@ describe('addTask', () => {
   it('adds a Task to today with a uuid and a fresh updatedAt', () => {
     const next = addTask(emptyState(), 'Buy oat milk', clock);
     expect(next.tasks).toHaveLength(1);
-    expect(next.tasks[0]).toMatchObject({ title: 'Buy oat milk', done: false, day: clock.today, order: 0 });
+    expect(next.tasks[0]).toMatchObject({ title: 'Buy oat milk', status: 'open', day: clock.today, order: 0 });
     expect(next.tasks[0].updatedAt).toBe(clock.now);
     expect(next.tasks[0].id).toMatch(/^[0-9a-f-]{36}$/);
   });
@@ -61,7 +61,7 @@ describe('leftovers', () => {
   });
 
   it('excludes finished work', () => {
-    const state = stateWith([task({ id: 'done', day: '2026-09-16', done: true })]);
+    const state = stateWith([task({ id: 'done', day: '2026-09-16', status: 'done' })]);
     expect(leftovers(state, clock.today)).toHaveLength(0);
   });
 
@@ -91,54 +91,79 @@ describe('tasksForDay', () => {
     ]);
     expect(tasksForDay(state, clock.today).map((t) => t.id)).toEqual(['first', 'second']);
   });
+
+  it('hides abandoned and erased Tasks, so v2 looks identical to v1 on screen', () => {
+    const state = stateWith([
+      task({ id: 'visible' }),
+      task({ id: 'gone', order: 1, status: 'abandoned' }),
+      task({ id: 'typo', order: 2, status: 'erased' }),
+    ]);
+    expect(tasksForDay(state, clock.today).map((t) => t.id)).toEqual(['visible']);
+  });
 });
 
 describe('toggleTask', () => {
   it('flips done and stamps updatedAt', () => {
-    const state = stateWith([task({ id: 'a', done: false })]);
+    const state = stateWith([task({ id: 'a', status: 'open' })]);
     const next = toggleTask(state, 'a', clock);
-    expect(next.tasks[0].done).toBe(true);
+    expect(next.tasks[0].status).toBe('done');
     expect(next.tasks[0].updatedAt).toBe(clock.now);
   });
 
   it('flips back', () => {
-    const state = stateWith([task({ id: 'a', done: true })]);
-    expect(toggleTask(state, 'a', clock).tasks[0].done).toBe(false);
+    const state = stateWith([task({ id: 'a', status: 'done' })]);
+    expect(toggleTask(state, 'a', clock).tasks[0].status).toBe('open');
   });
 
   it('leaves other Tasks alone', () => {
     const state = stateWith([task({ id: 'a' }), task({ id: 'b' })]);
     expect(toggleTask(state, 'a', clock).tasks[1]).toBe(state.tasks[1]);
   });
+
+  it('REFUSES to resurrect an abandoned or erased Task', () => {
+    // The UI offers no un-drop, so any reappearance is a bug by definition.
+    // A stale device toggling a tombstone is exactly how that would happen.
+    for (const status of ['abandoned', 'erased'] as const) {
+      const state = stateWith([task({ id: 'a', status })]);
+      const next = toggleTask(state, 'a', clock);
+      expect(next.tasks[0].status).toBe(status);
+      expect(next.tasks[0].updatedAt).toBe(state.tasks[0].updatedAt);
+    }
+  });
 });
 
-describe('deleteTask', () => {
-  it('removes the Task outright — no tombstone', () => {
+describe('abandonTask', () => {
+  it('keeps the row as a tombstone and stamps updatedAt', () => {
+    // A hard delete cannot cross devices: a removed row is indistinguishable
+    // from one the other device has not seen yet, so it resurrects.
     const state = stateWith([task({ id: 'a' }), task({ id: 'b' })]);
-    const next = deleteTask(state, 'a');
-    expect(next.tasks.map((t) => t.id)).toEqual(['b']);
-    expect(next.tasks.some((t) => 'deleted' in t)).toBe(false);
+    const next = abandonTask(state, 'a', clock);
+    expect(next.tasks.map((t) => t.id)).toEqual(['a', 'b']);
+    expect(next.tasks[0].status).toBe('abandoned');
+    expect(next.tasks[0].updatedAt).toBe(clock.now);
   });
+});
 
-  it('is a no-op for an unknown id', () => {
+describe('eraseTask', () => {
+  it('keeps the row too — a different act, but it cannot vanish either', () => {
+    // Erasing means "this should never have existed" (a typo), which is NOT
+    // abandoning. It still needs a tombstone, or it resurrects the same way.
     const state = stateWith([task({ id: 'a' })]);
-    expect(deleteTask(state, 'nope').tasks).toHaveLength(1);
+    const next = eraseTask(state, 'a', clock);
+    expect(next.tasks).toHaveLength(1);
+    expect(next.tasks[0].status).toBe('erased');
+    expect(next.tasks[0].updatedAt).toBe(clock.now);
   });
 
-  it('does not mutate the input state', () => {
-    const state = stateWith([task({ id: 'a' })]);
-    deleteTask(state, 'a');
-    expect(state.tasks).toHaveLength(1);
-  });
-
-  it('leaves order gaps that do not disturb later appends', () => {
-    // order is max+1 within a Day, so a gap is harmless — nothing renumbers.
+  it('leaves an order gap that does not disturb later appends', () => {
+    // A tombstone keeps its `order`, so nothing renumbers and nothing reuses
+    // its slot — which is what keeps `order` merge-safe for now.
     const state = stateWith([
       task({ id: 'a', order: 0 }),
       task({ id: 'b', order: 1 }),
       task({ id: 'c', order: 2 }),
     ]);
-    const next = addTask(deleteTask(state, 'b'), 'new one', clock);
+    const next = addTask(eraseTask(state, 'b', clock), 'new one', clock);
     expect(next.tasks.at(-1)!.order).toBe(3);
     expect(tasksForDay(next, clock.today).map((t) => t.id)).toEqual(['a', 'c', next.tasks.at(-1)!.id]);
   });
@@ -171,11 +196,13 @@ describe('triageTask', () => {
     expect(next.tasks.find((t) => t.id === 'moved')!.order).toBe(1);
   });
 
-  it('drop is a HARD delete — no tombstone', () => {
-    const state = stateWith([task({ id: 'a' }), task({ id: 'b' })]);
+  it('drop ABANDONS — the row survives as a tombstone, and stops being shown', () => {
+    const state = stateWith([task({ id: 'a' }), task({ id: 'b', order: 1 })]);
     const next = triageTask(state, 'a', 'drop', clock);
-    expect(next.tasks.map((t) => t.id)).toEqual(['b']);
-    expect(next.tasks.some((t) => 'deleted' in t)).toBe(false);
+    expect(next.tasks.map((t) => t.id)).toEqual(['a', 'b']);
+    expect(next.tasks[0].status).toBe('abandoned');
+    expect(next.tasks[0].updatedAt).toBe(clock.now);
+    expect(tasksForDay(next, clock.today).map((t) => t.id)).toEqual(['b']);
   });
 
   it('stamps updatedAt on a move but leaves `day` as a label', () => {
