@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 
 # scaffolded
+
+# Agent worktrees
+.claude/worktrees/
