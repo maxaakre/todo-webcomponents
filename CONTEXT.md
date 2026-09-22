@@ -29,3 +29,11 @@ The Triage verdict meaning "I am not going to do this." A dropped Task is **aban
 ## Abandoned
 
 The state of a Task that was dropped. Alongside **done**, one of the two ways a Task can be finished with; a Task that is neither is still open. Abandonment is **final** — there is no un-dropping.
+
+## Erase
+
+What the `×` on a Task means: **this should never have existed** — a typo, a duplicate, a mistake. Distinct from **Drop**: dropping is a decision about work, erasing is a correction to the record. Pressing `×` always means erase, whatever the Task's age.
+
+## Erased
+
+The state of a Task that was erased. Unlike **done** and **abandoned**, it is not an outcome — it is a claim that the Task never counted.
