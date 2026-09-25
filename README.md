@@ -16,7 +16,7 @@ The app is also a **learning vehicle for Lit and web components**, so idiomatic 
 |---|---|
 | Design decisions | **9 of 9 resolved** |
 | The app | ✅ built, matches the design |
-| Tests | ✅ **56 passing** |
+| Tests | ✅ **227 passing**: 68 app, 149 library, 10 React demo |
 
 Also verified by hand in a browser: dark mode, and the full triage flow end to end.
 
@@ -179,14 +179,14 @@ Two throwaway branches hold primary sources. Neither is merged, by design — `m
 
 ## Tests
 
-`pnpm test` — **62 app tests**, in two Vitest projects: pure logic on happy-dom, and `elements.test.ts` in real Chromium. The split exists because happy-dom has no `ElementInternals`, and the app's form controls come from `@maxaakre/ui`, which is form-associated. The library has its own suite (`packages/ui`).
+`pnpm test` runs every package. The app has **68 tests**, in two Vitest projects: pure logic on happy-dom, and `elements.test.ts` in real Chromium. The split exists because happy-dom has no `ElementInternals`, and the app's form controls come from `@maxaakre/ui`, which is form-associated. The library has its own suite (`packages/ui`).
 
 They concentrate on the places that fail **silently**:
 
 - `day.test.ts` — that `currentDay()` is **local time, not UTC**, plus month, year and leap-day boundaries
-- `store.test.ts` — the leftovers filter across multiple earlier Days, bottom-ordering on a move, hard delete (both paths), immutability
+- `store.test.ts` — the leftovers filter across multiple earlier Days, bottom-ordering on a move, Drop and Erase keeping the row as a tombstone, immutability
 - `storage.test.ts` — the version and corrupt refusals leaving data **byte-identical**, and the cross-tab write guard
-- `elements.test.ts` — the two-pane/single-column switch, the composer, and the error screen, driven through the real elements
+- `elements.test.ts` — the two-pane/single-column switch, the composer, the Erase confirmation and where focus lands after it, and the error screen, driven through the real elements in Chromium
 
 The suite was **mutation-checked**: making a moved Task land at the top, switching `currentDay()` to UTC, wiping on a version mismatch, and removing the write guard each produced failures. It is not a suite that passes regardless.
 
