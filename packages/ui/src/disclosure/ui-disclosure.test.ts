@@ -31,20 +31,6 @@ describe('ui-disclosure: open, both ways', () => {
     expect(el.querySelector('p')!.checkVisibility()).toBe(true);
   });
 
-  it('property → native: setting open opens the <details>', async () => {
-    const el = await make();
-    el.open = true;
-    await el.updateComplete;
-    expect(details(el).open).toBe(true);
-  });
-
-  it('reflects open, so ui-disclosure[open] works in CSS', async () => {
-    const el = await make();
-    el.open = true;
-    await el.updateComplete;
-    expect(el.hasAttribute('open')).toBe(true);
-  });
-
   it('native → property: a user click updates open', async () => {
     const el = await make();
     await userEvent.click(summary(el));

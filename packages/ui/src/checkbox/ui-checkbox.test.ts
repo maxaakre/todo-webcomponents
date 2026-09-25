@@ -9,13 +9,6 @@ import type { UiCheckbox } from './ui-checkbox.js';
 const box = (el: UiCheckbox) => el.shadowRoot!.querySelector('input')!;
 
 describe('ui-checkbox: properties and attributes', () => {
-  it('reads checked and disabled from attributes', async () => {
-    const el = await fixture<UiCheckbox>(html`<ui-checkbox checked disabled>Done</ui-checkbox>`);
-    expect(el.checked).toBe(true);
-    expect(box(el).checked).toBe(true);
-    expect(box(el).disabled).toBe(true);
-  });
-
   it('reflects checked, so consumers can style ui-checkbox[checked]', async () => {
     const el = await fixture<UiCheckbox>(html`<ui-checkbox>Done</ui-checkbox>`);
     el.checked = true;

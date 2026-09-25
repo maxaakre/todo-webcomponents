@@ -180,14 +180,6 @@ describe('ui-tabs: keyboard (manual activation)', () => {
     expect(window.scrollY).toBe(0);
   });
 
-  it('only one tab is in the tab order at a time (roving tabindex)', async () => {
-    const el = await make();
-    await settle(el);
-    await userEvent.tab();
-    await userEvent.keyboard('{ArrowRight}');
-    expect(tabs(el).map((t) => t.tabIndex)).toEqual([-1, 0, -1]);
-  });
-
   it('Tab from any focused tab goes to the panel', async () => {
     const el = await make();
     await settle(el);

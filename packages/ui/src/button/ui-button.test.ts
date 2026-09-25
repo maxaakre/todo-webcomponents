@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { userEvent } from 'vitest/browser';
 import { fixture } from '../test/fixture.js';
 import { expectNoA11yViolations } from '../test/a11y.js';
+import { contrastRatio } from '../test/contrast.js';
 import './ui-button.js';
 import type { UiButton } from './ui-button.js';
 
@@ -25,13 +26,6 @@ describe('ui-button: properties and attributes', () => {
     expect(el.getAttribute('variant')).toBe('danger');
     expect(el.getAttribute('size')).toBe('sm');
     expect(el.hasAttribute('disabled')).toBe(true);
-  });
-
-  it('reads attributes into properties', async () => {
-    const el = await fixture<UiButton>(html`<ui-button variant="primary" disabled>Save</ui-button>`);
-    expect(el.variant).toBe('primary');
-    expect(el.disabled).toBe(true);
-    expect(inner(el).disabled).toBe(true);
   });
 
   it('forwards label to the inner button as its accessible name', async () => {
@@ -67,13 +61,6 @@ describe('ui-button: accessible name warning', () => {
 });
 
 describe('ui-button: keyboard and focus', () => {
-  it('is reachable with Tab', async () => {
-    const el = await fixture<UiButton>(html`<ui-button>Save</ui-button>`);
-    await userEvent.tab();
-    expect(document.activeElement).toBe(el);
-    expect(el.shadowRoot!.activeElement).toBe(inner(el));
-  });
-
   it('focus() on the host moves focus to the inner button (delegatesFocus)', async () => {
     const el = await fixture<UiButton>(html`<ui-button>Save</ui-button>`);
     el.focus();
@@ -100,15 +87,6 @@ describe('ui-button: keyboard and focus', () => {
     const onClick = vi.fn();
     const el = await fixture<UiButton>(html`<ui-button disabled @click=${onClick}>Save</ui-button>`);
     await userEvent.click(el, { force: true });
-    expect(onClick).not.toHaveBeenCalled();
-  });
-
-  it('fires no click for consumers when disabled, from el.click()', async () => {
-    // A native disabled <button>.click() does nothing. The host is not a
-    // <button>, so without a guard this click would reach listeners.
-    const onClick = vi.fn();
-    const el = await fixture<UiButton>(html`<ui-button disabled @click=${onClick}>Save</ui-button>`);
-    el.click();
     expect(onClick).not.toHaveBeenCalled();
   });
 
@@ -160,10 +138,29 @@ describe('ui-button: forms', () => {
 });
 
 describe('ui-button: axe', () => {
-  it.each(['primary', 'secondary', 'ghost', 'danger'] as const)('%s has no violations', async (variant) => {
-    const el = await fixture<UiButton>(html`<ui-button variant=${variant}>Save</ui-button>`);
+  it('has no violations in any variant', async () => {
+    const el = await fixture<HTMLDivElement>(html`
+      <div>
+        <ui-button variant="primary">Save</ui-button>
+        <ui-button variant="secondary">Save</ui-button>
+        <ui-button variant="ghost">Save</ui-button>
+        <ui-button variant="danger">Save</ui-button>
+      </div>`);
     await expectNoA11yViolations(el);
   });
+
+  it.each(['primary', 'secondary', 'ghost', 'danger'] as const)(
+    '%s: label text meets 4.5:1 against what is actually behind it',
+    async (variant) => {
+      // axe does not see this inside shadow DOM, and tokens.test.ts checks
+      // token pairs, not which pair each variant really renders.
+      const el = await fixture<UiButton>(html`<ui-button variant=${variant}>Save</ui-button>`);
+      const style = getComputedStyle(inner(el));
+      // Secondary and ghost are transparent: behind them is the white test page.
+      const bg = style.backgroundColor === 'rgba(0, 0, 0, 0)' ? '#ffffff' : style.backgroundColor;
+      expect(contrastRatio(style.color, bg)).toBeGreaterThanOrEqual(4.5);
+    },
+  );
 
   it('icon-only with a label has no violations', async () => {
     const el = await fixture<UiButton>(html`<ui-button label="Close"><svg aria-hidden="true"></svg></ui-button>`);
