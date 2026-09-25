@@ -1,7 +1,9 @@
-import { LitElement, css, html } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { css, html } from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { DEV } from '../internal/dev.js';
+import { FormControl } from '../internal/form-control.js';
+import { slotText } from '../internal/slot-text.js';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 export type ButtonSize = 'sm' | 'md';
@@ -23,12 +25,7 @@ export type ButtonSize = 'sm' | 'md';
  * @cssprop [--ui-button-gap=var(--ui-space-1)] - Space between slots.
  */
 @customElement('ui-button')
-export class UiButton extends LitElement {
-  /** Form-associated, so `type="submit"` can reach a form outside the shadow root. */
-  static formAssociated = true;
-
-  static shadowRootOptions = { ...LitElement.shadowRootOptions, delegatesFocus: true };
-
+export class UiButton extends FormControl {
   static styles = css`
     :host { display: inline-block; }
     :host([hidden]) { display: none; }
@@ -88,13 +85,6 @@ export class UiButton extends LitElement {
   @property({ reflect: true }) size: ButtonSize = 'md';
 
   /**
-   * Reflected, and that matters beyond styling: a form-associated element
-   * with a `disabled` attribute is a disabled form control to the browser.
-   * It leaves the tab order and ignores clicks, including `el.click()`.
-   */
-  @property({ type: Boolean, reflect: true }) disabled = false;
-
-  /**
    * `button` by default, not `submit` like the native element: an accidental
    * submit is worse than a button that needs one more attribute.
    */
@@ -106,35 +96,19 @@ export class UiButton extends LitElement {
    */
   @property() label?: string;
 
-  /** Set by a disabled ancestor `<fieldset>`, through the form-associated callback. */
-  @state() private formDisabled = false;
-
   @query('button') private button!: HTMLButtonElement;
-
-  private internals = this.attachInternals();
-
-  /** Called by the browser when a `<fieldset>` around it is (un)disabled. */
-  formDisabledCallback(disabled: boolean) {
-    this.formDisabled = disabled;
-  }
-
-  private get isDisabled() {
-    return this.disabled || this.formDisabled;
-  }
 
   private onClick() {
     // The inner <button> lives in the shadow root, so it has no form.
     // The host does, through ElementInternals.
-    if (this.type === 'submit') this.internals.form?.requestSubmit();
+    if (this.type === 'submit') this.form?.requestSubmit();
   }
 
   private warned = false;
 
   private warnIfNameless() {
     if (!DEV || this.label || this.warned) return;
-    const slot = this.button.querySelector<HTMLSlotElement>('slot:not([name])')!;
-    const text = slot.assignedNodes({ flatten: true }).map((n) => n.textContent).join('').trim();
-    if (!text) {
+    if (!slotText(this.button.querySelector('slot:not([name])')!)) {
       this.warned = true;
       console.warn('<ui-button> has no accessible name. Add text or a `label`.', this);
     }

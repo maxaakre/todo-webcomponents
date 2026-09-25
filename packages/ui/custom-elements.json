@@ -45,25 +45,6 @@
           "members": [
             {
               "kind": "field",
-              "name": "formAssociated",
-              "type": {
-                "text": "boolean"
-              },
-              "static": true,
-              "default": "true",
-              "description": "Form-associated, so `type=\"submit\"` can reach a form outside the shadow root."
-            },
-            {
-              "kind": "field",
-              "name": "shadowRootOptions",
-              "type": {
-                "text": "object"
-              },
-              "static": true,
-              "default": "{ ...LitElement.shadowRootOptions, delegatesFocus: true }"
-            },
-            {
-              "kind": "field",
               "name": "variant",
               "type": {
                 "text": "ButtonVariant"
@@ -81,17 +62,6 @@
               },
               "default": "'md'",
               "attribute": "size",
-              "reflects": true
-            },
-            {
-              "kind": "field",
-              "name": "disabled",
-              "type": {
-                "text": "boolean"
-              },
-              "default": "false",
-              "description": "Reflected, and that matters beyond styling: a form-associated element\nwith a `disabled` attribute is a disabled form control to the browser.\nIt leaves the tab order and ignores clicks, including `el.click()`.",
-              "attribute": "disabled",
               "reflects": true
             },
             {
@@ -115,45 +85,11 @@
             },
             {
               "kind": "field",
-              "name": "formDisabled",
-              "type": {
-                "text": "boolean"
-              },
-              "privacy": "private",
-              "default": "false",
-              "description": "Set by a disabled ancestor `<fieldset>`, through the form-associated callback."
-            },
-            {
-              "kind": "field",
               "name": "button",
               "type": {
                 "text": "HTMLButtonElement"
               },
               "privacy": "private"
-            },
-            {
-              "kind": "field",
-              "name": "internals",
-              "privacy": "private"
-            },
-            {
-              "kind": "method",
-              "name": "formDisabledCallback",
-              "parameters": [
-                {
-                  "name": "disabled",
-                  "type": {
-                    "text": "boolean"
-                  }
-                }
-              ],
-              "description": "Called by the browser when a `<fieldset>` around it is (un)disabled."
-            },
-            {
-              "kind": "field",
-              "name": "isDisabled",
-              "privacy": "private",
-              "readonly": true
             },
             {
               "kind": "method",
@@ -173,6 +109,114 @@
               "kind": "method",
               "name": "warnIfNameless",
               "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "formAssociated",
+              "type": {
+                "text": "boolean"
+              },
+              "static": true,
+              "default": "true",
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "shadowRootOptions",
+              "type": {
+                "text": "object"
+              },
+              "static": true,
+              "default": "{ ...LitElement.shadowRootOptions, delegatesFocus: true }",
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Reflected, and that matters beyond styling: a form-associated element\nwith a `disabled` attribute is a disabled form control to the browser.\nIt leaves the tab order and ignores clicks, including `el.click()`.",
+              "attribute": "disabled",
+              "reflects": true,
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "formDisabled",
+              "type": {
+                "text": "boolean"
+              },
+              "privacy": "protected",
+              "default": "false",
+              "description": "Set by a disabled ancestor `<fieldset>`, through `formDisabledCallback`.",
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "internals",
+              "privacy": "protected",
+              "readonly": true,
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "form",
+              "type": {
+                "text": "HTMLFormElement | null"
+              },
+              "description": "The form this control belongs to, if any.",
+              "readonly": true,
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "isDisabled",
+              "type": {
+                "text": "boolean"
+              },
+              "privacy": "protected",
+              "readonly": true,
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "formDisabledCallback",
+              "parameters": [
+                {
+                  "name": "disabled",
+                  "type": {
+                    "text": "boolean"
+                  }
+                }
+              ],
+              "description": "Called by the browser when a `<fieldset>` around it is (un)disabled.",
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
             }
           ],
           "attributes": [
@@ -194,15 +238,6 @@
               "fieldName": "size"
             },
             {
-              "name": "disabled",
-              "type": {
-                "text": "boolean"
-              },
-              "default": "false",
-              "description": "Reflected, and that matters beyond styling: a form-associated element\nwith a `disabled` attribute is a disabled form control to the browser.\nIt leaves the tab order and ignores clicks, including `el.click()`.",
-              "fieldName": "disabled"
-            },
-            {
               "name": "type",
               "type": {
                 "text": "'button' | 'submit'"
@@ -218,11 +253,24 @@
               },
               "description": "Accessible name for icon-only buttons. Use this, not `aria-label` on the\nhost: the host has no role, so a label there names nothing.",
               "fieldName": "label"
+            },
+            {
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Reflected, and that matters beyond styling: a form-associated element\nwith a `disabled` attribute is a disabled form control to the browser.\nIt leaves the tab order and ignores clicks, including `el.click()`.",
+              "fieldName": "disabled",
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
             }
           ],
           "superclass": {
-            "name": "LitElement",
-            "package": "lit"
+            "name": "FormControl",
+            "module": "/src/internal/form-control.js"
           },
           "tagName": "ui-button",
           "customElement": true
@@ -243,6 +291,849 @@
           "declaration": {
             "name": "UiButton",
             "module": "src/button/ui-button.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/checkbox/ui-checkbox.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "A checkbox with its label. Wraps a native `<input type=\"checkbox\">`, so\nSpace, focus and the checked/mixed announcement come from the platform.\n\nThe slotted text is the label: the `<label>` in the shadow root wraps the\nslot, so clicking the text toggles the box.\n\nEvents: native `input` and a re-dispatched `change` (native `change` is not\ncomposed). Neither fires when `checked` is set in code.",
+          "name": "UiCheckbox",
+          "cssProperties": [
+            {
+              "description": "Width and height of the box.",
+              "name": "--ui-checkbox-size",
+              "default": "1rem"
+            }
+          ],
+          "cssParts": [
+            {
+              "description": "The native `<input type=\"checkbox\">`.",
+              "name": "control"
+            },
+            {
+              "description": "The `<label>` around the box and the slot.",
+              "name": "label"
+            }
+          ],
+          "slots": [
+            {
+              "description": "The label.",
+              "name": ""
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "checked",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Reflected, so `ui-checkbox[checked]` works in CSS. The initial attribute is restored on form reset.",
+              "attribute": "checked",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "indeterminate",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Neither checked nor unchecked. Announced as \"mixed\". Cleared when the user toggles.",
+              "attribute": "indeterminate"
+            },
+            {
+              "kind": "field",
+              "name": "name",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Form field name. Read by the browser from the host's `name` attribute.",
+              "attribute": "name",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "value",
+              "type": {
+                "text": "string"
+              },
+              "default": "'on'",
+              "description": "Submitted when checked. Same default as a native checkbox.",
+              "attribute": "value"
+            },
+            {
+              "kind": "field",
+              "name": "input",
+              "type": {
+                "text": "HTMLInputElement"
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "defaultChecked",
+              "type": {
+                "text": "boolean | undefined"
+              },
+              "privacy": "private",
+              "description": "Captured once: `checked` reflects, so the attribute changes later."
+            },
+            {
+              "kind": "method",
+              "name": "formResetCallback",
+              "description": "Called by the browser on `form.reset()`."
+            },
+            {
+              "kind": "method",
+              "name": "onChange",
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "syncForm",
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "warnIfNameless",
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "formAssociated",
+              "type": {
+                "text": "boolean"
+              },
+              "static": true,
+              "default": "true",
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "shadowRootOptions",
+              "type": {
+                "text": "object"
+              },
+              "static": true,
+              "default": "{ ...LitElement.shadowRootOptions, delegatesFocus: true }",
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Reflected, and that matters beyond styling: a form-associated element\nwith a `disabled` attribute is a disabled form control to the browser.\nIt leaves the tab order and ignores clicks, including `el.click()`.",
+              "attribute": "disabled",
+              "reflects": true,
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "formDisabled",
+              "type": {
+                "text": "boolean"
+              },
+              "privacy": "protected",
+              "default": "false",
+              "description": "Set by a disabled ancestor `<fieldset>`, through `formDisabledCallback`.",
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "internals",
+              "privacy": "protected",
+              "readonly": true,
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "form",
+              "type": {
+                "text": "HTMLFormElement | null"
+              },
+              "description": "The form this control belongs to, if any.",
+              "readonly": true,
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "isDisabled",
+              "type": {
+                "text": "boolean"
+              },
+              "privacy": "protected",
+              "readonly": true,
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "formDisabledCallback",
+              "parameters": [
+                {
+                  "name": "disabled",
+                  "type": {
+                    "text": "boolean"
+                  }
+                }
+              ],
+              "description": "Called by the browser when a `<fieldset>` around it is (un)disabled.",
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            }
+          ],
+          "events": [
+            {
+              "name": "change",
+              "type": {
+                "text": "Event"
+              }
+            }
+          ],
+          "attributes": [
+            {
+              "name": "checked",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Reflected, so `ui-checkbox[checked]` works in CSS. The initial attribute is restored on form reset.",
+              "fieldName": "checked"
+            },
+            {
+              "name": "indeterminate",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Neither checked nor unchecked. Announced as \"mixed\". Cleared when the user toggles.",
+              "fieldName": "indeterminate"
+            },
+            {
+              "name": "name",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Form field name. Read by the browser from the host's `name` attribute.",
+              "fieldName": "name"
+            },
+            {
+              "name": "value",
+              "type": {
+                "text": "string"
+              },
+              "default": "'on'",
+              "description": "Submitted when checked. Same default as a native checkbox.",
+              "fieldName": "value"
+            },
+            {
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Reflected, and that matters beyond styling: a form-associated element\nwith a `disabled` attribute is a disabled form control to the browser.\nIt leaves the tab order and ignores clicks, including `el.click()`.",
+              "fieldName": "disabled",
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            }
+          ],
+          "superclass": {
+            "name": "FormControl",
+            "module": "/src/internal/form-control.js"
+          },
+          "tagName": "ui-checkbox",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "UiCheckbox",
+          "declaration": {
+            "name": "UiCheckbox",
+            "module": "src/checkbox/ui-checkbox.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-checkbox",
+          "declaration": {
+            "name": "UiCheckbox",
+            "module": "src/checkbox/ui-checkbox.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/text-field/ui-text-field.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "A single-line text input with its label, hint and error.\n\nThe label is rendered *inside* the shadow root, next to the input. An\noutside `<label for>` cannot reach an input in a shadow root, and neither\ncan `aria-labelledby` or `aria-describedby`: ID references do not cross\nthe shadow boundary.\n\nEvents: native `input` (it is composed, so it already reaches the host)\nand `change` (re-dispatched, because native `change` is not composed).\nNeither fires when `value` is set in code.",
+          "name": "UiTextField",
+          "cssProperties": [
+            {
+              "description": "Corner radius of the input.",
+              "name": "--ui-text-field-radius",
+              "default": "var(--ui-radius-md)"
+            }
+          ],
+          "cssParts": [
+            {
+              "description": "The `<label>`.",
+              "name": "label"
+            },
+            {
+              "description": "The native `<input>`.",
+              "name": "input"
+            },
+            {
+              "description": "The hint text.",
+              "name": "hint"
+            },
+            {
+              "description": "The error text.",
+              "name": "error"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "label",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "The visible label. Required: a field without one has no accessible name.",
+              "attribute": "label"
+            },
+            {
+              "kind": "field",
+              "name": "hideLabel",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Hide the label visually. It stays available to screen readers.",
+              "attribute": "hide-label",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "value",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Current value. The `value` attribute is the initial value, restored on form reset.",
+              "attribute": "value"
+            },
+            {
+              "kind": "field",
+              "name": "name",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Form field name. Read by the browser from the host's `name` attribute.",
+              "attribute": "name",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "placeholder",
+              "type": {
+                "text": "string | undefined"
+              },
+              "attribute": "placeholder"
+            },
+            {
+              "kind": "field",
+              "name": "required",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "attribute": "required",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "hint",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Help text under the input.",
+              "attribute": "hint"
+            },
+            {
+              "kind": "field",
+              "name": "error",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Error text. Non-empty makes the field invalid, with this as its message.",
+              "attribute": "error"
+            },
+            {
+              "kind": "field",
+              "name": "input",
+              "type": {
+                "text": "HTMLInputElement"
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "defaultValue",
+              "type": {
+                "text": "string"
+              },
+              "privacy": "private",
+              "default": "''"
+            },
+            {
+              "kind": "field",
+              "name": "validity",
+              "type": {
+                "text": "ValidityState"
+              },
+              "readonly": true
+            },
+            {
+              "kind": "field",
+              "name": "validationMessage",
+              "type": {
+                "text": "string"
+              },
+              "readonly": true
+            },
+            {
+              "kind": "method",
+              "name": "checkValidity",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "reportValidity",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "formResetCallback",
+              "description": "Called by the browser on `form.reset()`."
+            },
+            {
+              "kind": "method",
+              "name": "onInput",
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "onChange",
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "onKeydown",
+              "privacy": "private",
+              "parameters": [
+                {
+                  "name": "e",
+                  "type": {
+                    "text": "KeyboardEvent"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "syncForm",
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "formAssociated",
+              "type": {
+                "text": "boolean"
+              },
+              "static": true,
+              "default": "true",
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "shadowRootOptions",
+              "type": {
+                "text": "object"
+              },
+              "static": true,
+              "default": "{ ...LitElement.shadowRootOptions, delegatesFocus: true }",
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Reflected, and that matters beyond styling: a form-associated element\nwith a `disabled` attribute is a disabled form control to the browser.\nIt leaves the tab order and ignores clicks, including `el.click()`.",
+              "attribute": "disabled",
+              "reflects": true,
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "formDisabled",
+              "type": {
+                "text": "boolean"
+              },
+              "privacy": "protected",
+              "default": "false",
+              "description": "Set by a disabled ancestor `<fieldset>`, through `formDisabledCallback`.",
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "internals",
+              "privacy": "protected",
+              "readonly": true,
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "form",
+              "type": {
+                "text": "HTMLFormElement | null"
+              },
+              "description": "The form this control belongs to, if any.",
+              "readonly": true,
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "isDisabled",
+              "type": {
+                "text": "boolean"
+              },
+              "privacy": "protected",
+              "readonly": true,
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "formDisabledCallback",
+              "parameters": [
+                {
+                  "name": "disabled",
+                  "type": {
+                    "text": "boolean"
+                  }
+                }
+              ],
+              "description": "Called by the browser when a `<fieldset>` around it is (un)disabled.",
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            }
+          ],
+          "events": [
+            {
+              "name": "change",
+              "type": {
+                "text": "Event"
+              }
+            }
+          ],
+          "attributes": [
+            {
+              "name": "label",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "The visible label. Required: a field without one has no accessible name.",
+              "fieldName": "label"
+            },
+            {
+              "name": "hide-label",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Hide the label visually. It stays available to screen readers.",
+              "fieldName": "hideLabel"
+            },
+            {
+              "name": "value",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Current value. The `value` attribute is the initial value, restored on form reset.",
+              "fieldName": "value"
+            },
+            {
+              "name": "name",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Form field name. Read by the browser from the host's `name` attribute.",
+              "fieldName": "name"
+            },
+            {
+              "name": "placeholder",
+              "type": {
+                "text": "string | undefined"
+              },
+              "fieldName": "placeholder"
+            },
+            {
+              "name": "required",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "fieldName": "required"
+            },
+            {
+              "name": "hint",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Help text under the input.",
+              "fieldName": "hint"
+            },
+            {
+              "name": "error",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Error text. Non-empty makes the field invalid, with this as its message.",
+              "fieldName": "error"
+            },
+            {
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Reflected, and that matters beyond styling: a form-associated element\nwith a `disabled` attribute is a disabled form control to the browser.\nIt leaves the tab order and ignores clicks, including `el.click()`.",
+              "fieldName": "disabled",
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            }
+          ],
+          "superclass": {
+            "name": "FormControl",
+            "module": "/src/internal/form-control.js"
+          },
+          "tagName": "ui-text-field",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "UiTextField",
+          "declaration": {
+            "name": "UiTextField",
+            "module": "src/text-field/ui-text-field.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-text-field",
+          "declaration": {
+            "name": "UiTextField",
+            "module": "src/text-field/ui-text-field.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/internal/form-control.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "Shared plumbing for form-associated components.\n\nForm-associated means the browser treats the host as a real form control:\nit has a form, takes part in FormData and validation, and is disabled by\na disabled <fieldset>. The native control inside the shadow root cannot\ndo any of that, because it cannot see the form outside.",
+          "name": "FormControl",
+          "members": [
+            {
+              "kind": "field",
+              "name": "formAssociated",
+              "type": {
+                "text": "boolean"
+              },
+              "static": true,
+              "default": "true"
+            },
+            {
+              "kind": "field",
+              "name": "shadowRootOptions",
+              "type": {
+                "text": "object"
+              },
+              "static": true,
+              "default": "{ ...LitElement.shadowRootOptions, delegatesFocus: true }"
+            },
+            {
+              "kind": "field",
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Reflected, and that matters beyond styling: a form-associated element\nwith a `disabled` attribute is a disabled form control to the browser.\nIt leaves the tab order and ignores clicks, including `el.click()`.",
+              "attribute": "disabled",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "formDisabled",
+              "type": {
+                "text": "boolean"
+              },
+              "privacy": "protected",
+              "default": "false",
+              "description": "Set by a disabled ancestor `<fieldset>`, through `formDisabledCallback`."
+            },
+            {
+              "kind": "field",
+              "name": "internals",
+              "privacy": "protected",
+              "readonly": true
+            },
+            {
+              "kind": "field",
+              "name": "form",
+              "type": {
+                "text": "HTMLFormElement | null"
+              },
+              "description": "The form this control belongs to, if any.",
+              "readonly": true
+            },
+            {
+              "kind": "field",
+              "name": "isDisabled",
+              "type": {
+                "text": "boolean"
+              },
+              "privacy": "protected",
+              "readonly": true
+            },
+            {
+              "kind": "method",
+              "name": "formDisabledCallback",
+              "parameters": [
+                {
+                  "name": "disabled",
+                  "type": {
+                    "text": "boolean"
+                  }
+                }
+              ],
+              "description": "Called by the browser when a `<fieldset>` around it is (un)disabled."
+            }
+          ],
+          "attributes": [
+            {
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Reflected, and that matters beyond styling: a form-associated element\nwith a `disabled` attribute is a disabled form control to the browser.\nIt leaves the tab order and ignores clicks, including `el.click()`.",
+              "fieldName": "disabled"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "FormControl",
+          "declaration": {
+            "name": "FormControl",
+            "module": "src/internal/form-control.ts"
           }
         }
       ]
