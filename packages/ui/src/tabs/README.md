@@ -60,7 +60,7 @@ A panel has `tabindex="0"`. Without it, Tab would skip a panel that has no focus
 | Key | Does |
 |---|---|
 | Tab | Into the tab list: focuses the **selected** tab. From a tab: moves to the panel. |
-| → / ← | Next / previous tab. Wraps at both ends. Focus only. |
+| → / ← | Next / previous tab. Wraps at both ends. Focus only. In right-to-left layouts (`dir="rtl"`) they swap, so "next" follows reading direction. |
 | Home / End | First / last tab. Does not scroll the page. |
 | Enter / Space | Selects the focused tab. |
 

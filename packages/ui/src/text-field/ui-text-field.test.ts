@@ -179,6 +179,17 @@ describe('ui-text-field: forms', () => {
     expect(new FormData(form).get('title')).toBe('Start');
   });
 
+  it('restores its value when the browser restores the form (back/forward, autofill)', async () => {
+    const form = await fixture<HTMLFormElement>(html`
+      <form><ui-text-field label="Task" name="title"></ui-text-field></form>`);
+    const el = form.querySelector('ui-text-field')!;
+    el.formStateRestoreCallback('Milk', 'restore');
+    await el.updateComplete;
+    expect(el.value).toBe('Milk');
+    expect(input(el).value).toBe('Milk');
+    expect(new FormData(form).get('title')).toBe('Milk');
+  });
+
   it('is disabled by a disabled <fieldset> and leaves FormData', async () => {
     const form = await fixture<HTMLFormElement>(html`
       <form><fieldset disabled><ui-text-field label="Task" name="title" value="x"></ui-text-field></fieldset></form>`);

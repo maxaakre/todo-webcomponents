@@ -224,6 +224,19 @@ describe('ui-dialog: user closes and ui-close', () => {
     expect(dialog.open).toBe(false);
   });
 
+  it('close-on-backdrop ignores a drag that starts inside and ends on the backdrop', async () => {
+    // Selecting text and releasing over the backdrop makes the browser fire
+    // click on the common ancestor: the <dialog>. That is not a backdrop click.
+    const { trigger, dialog } = parts(await make({ closeOnBackdrop: true }));
+    await openFrom(trigger, dialog);
+    dialog.querySelector('p')!.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, composed: true }));
+    native(dialog).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await dialog.updateComplete;
+    expect(dialog.open).toBe(true);
+    dialog.open = false;
+    await dialog.updateComplete;
+  });
+
   it('ui-close bubbles but is not composed', async () => {
     const root = await make();
     const { trigger, dialog } = parts(root);

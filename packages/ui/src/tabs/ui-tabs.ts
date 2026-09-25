@@ -193,9 +193,13 @@ export class UiTabs extends LitElement {
     const current = tabs.indexOf(e.target as UiTab);
     if (current < 0) return;
     const last = tabs.length - 1;
+    const after = current === last ? 0 : current + 1;
+    const before = current === 0 ? last : current - 1;
+    // "Next" follows reading direction: in right-to-left layouts it is ←.
+    const rtl = this.matches(':dir(rtl)');
     const next = ({
-      ArrowRight: current === last ? 0 : current + 1,
-      ArrowLeft: current === 0 ? last : current - 1,
+      ArrowRight: rtl ? before : after,
+      ArrowLeft: rtl ? after : before,
       Home: 0,
       End: last,
     } as Record<string, number>)[e.key];

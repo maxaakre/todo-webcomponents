@@ -163,6 +163,44 @@ describe('ui-checkbox: forms', () => {
     expect(el.checked).toBe(false);
   });
 
+  it('resets to checked when checked was set as a property before connecting (React)', async () => {
+    // React 19 sets properties on a new element before inserting it. The
+    // attribute does not exist yet (reflection happens on first render).
+    const form = await fixture<HTMLFormElement>(html`<form></form>`);
+    const el = document.createElement('ui-checkbox');
+    el.checked = true;
+    el.textContent = 'Done';
+    form.append(el);
+    await el.updateComplete;
+    await userEvent.click(box(el));
+    form.reset();
+    await el.updateComplete;
+    expect(el.checked).toBe(true);
+  });
+
+  it('restores its state when the browser restores the form (back/forward, autofill)', async () => {
+    const el = await fixture<UiCheckbox>(html`<ui-checkbox>Done</ui-checkbox>`);
+    el.formStateRestoreCallback('checked', 'restore');
+    await el.updateComplete;
+    expect(el.checked).toBe(true);
+    el.formStateRestoreCallback('unchecked', 'restore');
+    await el.updateComplete;
+    expect(el.checked).toBe(false);
+  });
+
+  it('hands the browser the same state strings that restore expects', async () => {
+    // The browser can't be made to restore a form in a test, so check the
+    // other half of the contract: the state saved with the value. Without
+    // it the browser would hand back the value ("on"), read as unchecked.
+    const el = await fixture<UiCheckbox>(html`<ui-checkbox value="yes">Done</ui-checkbox>`);
+    const internals = (el as unknown as { internals: ElementInternals }).internals;
+    const setFormValue = vi.spyOn(internals, 'setFormValue');
+    await userEvent.click(box(el));
+    expect(setFormValue).toHaveBeenLastCalledWith('yes', 'checked');
+    await userEvent.click(box(el));
+    expect(setFormValue).toHaveBeenLastCalledWith(null, 'unchecked');
+  });
+
   it('is disabled by a disabled <fieldset>', async () => {
     const form = await fixture<HTMLFormElement>(html`
       <form><fieldset disabled><ui-checkbox name="done" checked>Done</ui-checkbox></fieldset></form>`);

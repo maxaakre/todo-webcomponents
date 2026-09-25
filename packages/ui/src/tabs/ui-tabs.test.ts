@@ -130,6 +130,21 @@ describe('ui-tabs: keyboard (manual activation)', () => {
     expect(selectedIndex(el)).toBe(0); // focus only
   });
 
+  it('in right-to-left layouts, ← moves to the next tab and → to the previous', async () => {
+    const root = await fixture<HTMLDivElement>(html`
+      <div dir="rtl"><ui-tabs label="X">
+        <ui-tab>A</ui-tab><ui-tab>B</ui-tab><ui-tab>C</ui-tab>
+        <ui-tab-panel>a</ui-tab-panel><ui-tab-panel>b</ui-tab-panel><ui-tab-panel>c</ui-tab-panel>
+      </ui-tabs></div>`);
+    const el = root.querySelector('ui-tabs')!;
+    await settle(el);
+    await userEvent.tab();
+    await userEvent.keyboard('{ArrowLeft}');
+    expect(document.activeElement).toBe(tabs(el)[1]);
+    await userEvent.keyboard('{ArrowRight}');
+    expect(document.activeElement).toBe(tabs(el)[0]);
+  });
+
   it('Home and End jump to the ends', async () => {
     const el = await make(1);
     await settle(el);

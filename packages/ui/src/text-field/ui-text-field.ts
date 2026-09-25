@@ -106,6 +106,11 @@ export class UiTextField extends FormControl {
     this.value = this.defaultValue;
   }
 
+  /** Called by the browser when it restores the form: back/forward navigation, autofill. */
+  formStateRestoreCallback(state: string | File | FormData | null, _mode: 'restore' | 'autocomplete') {
+    if (typeof state === 'string') this.value = state;
+  }
+
   private onInput() {
     this.value = this.input.value;
     // Sync now, not after the next render: a listener on this same event

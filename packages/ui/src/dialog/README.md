@@ -31,7 +31,7 @@ dialog.addEventListener('ui-close', (e) => {
 - **`ui-close` is cancelable.** Every *user* close (Escape, backdrop, `data-dialog-close`) asks first. `preventDefault()` keeps it open, for example with unsaved changes. Code setting `open = false` closes without asking.
 - **`data-dialog-close`, not `<form method="dialog">`.** A slotted form's DOM parent is the host, not the `<dialog>` inside the shadow root, so `method="dialog"` cannot find it. A shadow-boundary trap.
 - **`label` is required.** It becomes a visible heading and the dialog's accessible name through `aria-labelledby`. Both are in the same shadow root, so the ID reference works.
-- **Backdrop clicks are off by default.** One stray click should not throw away what someone typed.
+- **Backdrop clicks are off by default.** One stray click should not throw away what someone typed. With `close-on-backdrop` on, only a press that **starts** on the backdrop counts. Dragging a text selection out of the dialog also clicks the `<dialog>` (the common ancestor), and must not close it.
 
 ## Known limits
 

@@ -18,6 +18,7 @@ A single-line text input with its label, hint and error.
 - **`input` passes through, `change` is re-dispatched.** Native `input` is *composed*, so it already leaves the shadow root. Native `change` is not, so the host fires its own.
 - **No events when code sets `value`.** Only the user causes events. Otherwise a framework that sets `value` in response to `input` would loop.
 - **Enter submits the form.** A native input does this ("implicit submission"). The inner input has no form, so the component calls `form.requestSubmit()`.
+- **Survives back/forward and autofill** through `formStateRestoreCallback`.
 - **`error` makes the field invalid.** It sets a custom validity with that message, so `form.checkValidity()` and `:invalid` agree with what the user sees.
 
 ### A subtle one: scripted events

@@ -64,18 +64,27 @@ export class UiCheckbox extends FormControl {
 
   @query('input') private input!: HTMLInputElement;
 
-  /** Captured once: `checked` reflects, so the attribute changes later. */
+  /**
+   * Captured once, from the property: `checked` reflects, so the attribute
+   * changes later, and React sets the property before the element connects,
+   * when there is no attribute yet.
+   */
   private defaultChecked?: boolean;
 
   connectedCallback() {
     super.connectedCallback();
-    this.defaultChecked ??= this.hasAttribute('checked');
+    this.defaultChecked ??= this.checked;
   }
 
   /** Called by the browser on `form.reset()`. */
   formResetCallback() {
     this.checked = this.defaultChecked ?? false;
     this.indeterminate = false;
+  }
+
+  /** Called by the browser when it restores the form: back/forward navigation, autofill. */
+  formStateRestoreCallback(state: string | File | FormData | null, _mode: 'restore' | 'autocomplete') {
+    this.checked = state === 'checked';
   }
 
   private onChange() {
@@ -87,7 +96,9 @@ export class UiCheckbox extends FormControl {
   }
 
   private syncForm() {
-    this.internals.setFormValue(this.checked ? this.value : null);
+    // The second argument is the state the browser hands back to
+    // formStateRestoreCallback; the value alone cannot tell unchecked apart.
+    this.internals.setFormValue(this.checked ? this.value : null, this.checked ? 'checked' : 'unchecked');
   }
 
   private warnIfNameless() {

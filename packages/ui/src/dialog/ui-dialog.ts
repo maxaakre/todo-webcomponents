@@ -76,6 +76,9 @@ export class UiDialog extends LitElement {
 
   @query('dialog') private dialog!: HTMLDialogElement;
 
+  /** Whether the current press began on the backdrop. See onClick. */
+  private pressedOnBackdrop = false;
+
   /** A user-initiated close. Asks first, through a cancelable ui-close. */
   private requestClose(returnValue: string) {
     const event: UiCloseEvent = new CustomEvent('ui-close', {
@@ -94,7 +97,10 @@ export class UiDialog extends LitElement {
 
   private onClick(e: MouseEvent) {
     if (e.target === this.dialog) {
-      if (this.closeOnBackdrop) this.requestClose('');
+      // A drag from inside (selecting text) that ends on the backdrop also
+      // clicks the <dialog>, the common ancestor. Only a press that began
+      // on the backdrop counts.
+      if (this.closeOnBackdrop && this.pressedOnBackdrop) this.requestClose('');
       return;
     }
     // Clicks from slotted content are retargeted; composedPath sees the real
@@ -132,7 +138,8 @@ export class UiDialog extends LitElement {
   render() {
     return html`
       <dialog part="dialog" aria-labelledby="title"
-              @cancel=${this.onCancel} @close=${this.onClose} @click=${this.onClick}>
+              @cancel=${this.onCancel} @close=${this.onClose} @click=${this.onClick}
+              @pointerdown=${(e: PointerEvent) => (this.pressedOnBackdrop = e.target === this.dialog)}>
         <div class="panel">
           <h2 part="title" id="title">${this.label}</h2>
           <slot></slot>
