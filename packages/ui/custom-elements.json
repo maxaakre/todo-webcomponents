@@ -709,6 +709,307 @@
     },
     {
       "kind": "javascript-module",
+      "path": "src/tabs/ui-tabs.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "One tab. Place it directly inside `<ui-tabs>`. It moves itself into the\ntab list (it sets `slot=\"tab\"` if you did not).",
+          "name": "UiTab",
+          "slots": [
+            {
+              "description": "The tab's label.",
+              "name": ""
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "selected",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Set by `<ui-tabs>`. Reflected for styling. Change the selection on `<ui-tabs>`, not here.",
+              "attribute": "selected",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "value",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Returned in `ui-tab-change`. Defaults to the tab's index.",
+              "attribute": "value"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "selected",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Set by `<ui-tabs>`. Reflected for styling. Change the selection on `<ui-tabs>`, not here.",
+              "fieldName": "selected"
+            },
+            {
+              "name": "value",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Returned in `ui-tab-change`. Defaults to the tab's index.",
+              "fieldName": "value"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "ui-tab",
+          "customElement": true
+        },
+        {
+          "kind": "class",
+          "description": "The content for one tab. Place it inside `<ui-tabs>`, in the same order\nas the tabs.",
+          "name": "UiTabPanel",
+          "slots": [
+            {
+              "description": "The panel content.",
+              "name": ""
+            }
+          ],
+          "members": [],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "ui-tab-panel",
+          "customElement": true
+        },
+        {
+          "kind": "class",
+          "description": "Tabs: one panel visible at a time. Follows the WAI-ARIA tabs pattern with\nmanual activation: arrow keys move focus, Enter or Space selects.\n\nTabs and panels are light-DOM children, not rendered in a shadow root.\nThat is on purpose: `aria-controls` and `aria-labelledby` are ID\nreferences, and those only work inside one DOM tree.\n\n```html\n<ui-tabs label=\"Views\">\n  <ui-tab>Today</ui-tab> <ui-tab>Week</ui-tab>\n  <ui-tab-panel>…</ui-tab-panel> <ui-tab-panel>…</ui-tab-panel>\n</ui-tabs>\n```",
+          "name": "UiTabs",
+          "cssParts": [
+            {
+              "description": "The row of tabs.",
+              "name": "tablist"
+            }
+          ],
+          "slots": [
+            {
+              "description": "The `<ui-tab>` elements. They assign themselves to it.",
+              "name": "tab"
+            },
+            {
+              "description": "The `<ui-tab-panel>` elements, in the same order as the tabs.",
+              "name": ""
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "label",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Accessible name of the tab list. Required: there may be several tab sets on a page.",
+              "attribute": "label"
+            },
+            {
+              "kind": "field",
+              "name": "selectedIndex",
+              "type": {
+                "text": "number"
+              },
+              "default": "0",
+              "description": "Index of the selected tab. Reflected. Out of range falls back to 0.",
+              "attribute": "selected-index",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "tabs",
+              "type": {
+                "text": "UiTab[]"
+              },
+              "privacy": "private",
+              "readonly": true
+            },
+            {
+              "kind": "field",
+              "name": "panels",
+              "type": {
+                "text": "UiTabPanel[]"
+              },
+              "privacy": "private",
+              "readonly": true
+            },
+            {
+              "kind": "method",
+              "name": "sync",
+              "privacy": "private",
+              "description": "Wire ids, selection, visibility and tabindex. Runs on every render and slot change."
+            },
+            {
+              "kind": "method",
+              "name": "select",
+              "privacy": "private",
+              "parameters": [
+                {
+                  "name": "index",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "focusTab",
+              "privacy": "private",
+              "parameters": [
+                {
+                  "name": "index",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ],
+              "description": "Move focus (only) and carry the single tabindex=0 with it."
+            },
+            {
+              "kind": "method",
+              "name": "onClick",
+              "privacy": "private",
+              "parameters": [
+                {
+                  "name": "e",
+                  "type": {
+                    "text": "Event"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "onKeydown",
+              "privacy": "private",
+              "parameters": [
+                {
+                  "name": "e",
+                  "type": {
+                    "text": "KeyboardEvent"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "onFocusout",
+              "privacy": "private",
+              "parameters": [
+                {
+                  "name": "e",
+                  "type": {
+                    "text": "FocusEvent"
+                  }
+                }
+              ]
+            }
+          ],
+          "events": [
+            {
+              "name": "ui-tab-change",
+              "type": {
+                "text": "UiTabChangeEvent"
+              },
+              "description": "The user selected a different tab. `detail.index` and `detail.value`. Not fired when `selectedIndex` is set in code."
+            }
+          ],
+          "attributes": [
+            {
+              "name": "label",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Accessible name of the tab list. Required: there may be several tab sets on a page.",
+              "fieldName": "label"
+            },
+            {
+              "name": "selected-index",
+              "type": {
+                "text": "number"
+              },
+              "default": "0",
+              "description": "Index of the selected tab. Reflected. Out of range falls back to 0.",
+              "fieldName": "selectedIndex"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "ui-tabs",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "UiTab",
+          "declaration": {
+            "name": "UiTab",
+            "module": "src/tabs/ui-tabs.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-tab",
+          "declaration": {
+            "name": "UiTab",
+            "module": "src/tabs/ui-tabs.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "UiTabPanel",
+          "declaration": {
+            "name": "UiTabPanel",
+            "module": "src/tabs/ui-tabs.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-tab-panel",
+          "declaration": {
+            "name": "UiTabPanel",
+            "module": "src/tabs/ui-tabs.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "UiTabs",
+          "declaration": {
+            "name": "UiTabs",
+            "module": "src/tabs/ui-tabs.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-tabs",
+          "declaration": {
+            "name": "UiTabs",
+            "module": "src/tabs/ui-tabs.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
       "path": "src/text-field/ui-text-field.ts",
       "declarations": [
         {

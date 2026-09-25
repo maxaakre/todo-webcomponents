@@ -30,6 +30,11 @@
       "types": "./dist/disclosure/ui-disclosure.d.ts",
       "default": "./dist/disclosure/ui-disclosure.js"
     },
+    "./tabs": {
+      "@maxaakre/source": "./src/tabs/ui-tabs.ts",
+      "types": "./dist/tabs/ui-tabs.d.ts",
+      "default": "./dist/tabs/ui-tabs.js"
+    },
     "./text-field": {
       "@maxaakre/source": "./src/text-field/ui-text-field.ts",
       "types": "./dist/text-field/ui-text-field.d.ts",

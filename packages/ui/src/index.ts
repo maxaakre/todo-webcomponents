@@ -3,4 +3,5 @@
 export * from './button/ui-button.js';
 export * from './checkbox/ui-checkbox.js';
 export * from './disclosure/ui-disclosure.js';
+export * from './tabs/ui-tabs.js';
 export * from './text-field/ui-text-field.js';
