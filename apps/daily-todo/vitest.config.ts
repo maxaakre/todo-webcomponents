@@ -1,5 +1,5 @@
 import { defineConfig, mergeConfig } from 'vitest/config';
-import { playwright } from '@vitest/browser-playwright';
+import { chromium } from '../../vitest.browser.js';
 import viteConfig from './vite.config.js';
 
 // Two projects. Pure logic runs fast in happy-dom. The element tests need
@@ -22,12 +22,7 @@ export default mergeConfig(viteConfig, defineConfig({
         test: {
           name: 'elements',
           include: ['src/elements.test.ts'],
-          browser: {
-            enabled: true,
-            provider: playwright(),
-            headless: true,
-            instances: [{ browser: 'chromium' }],
-          },
+          browser: chromium,
         },
       },
     ],

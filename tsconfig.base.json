@@ -1,0 +1,25 @@
+{
+  // Shared by every package. Each package's tsconfig.json extends this and
+  // adds only what is specific to it (types, include, conditions, jsx).
+  "compilerOptions": {
+    "target": "es2023",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+
+    /* Lit's decorators: legacy form, and no class-field define semantics. */
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false,
+
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true,
+    "noEmit": true,
+
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "erasableSyntaxOnly": true
+  }
+}

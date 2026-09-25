@@ -1,21 +1,9 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "es2023",
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "customConditions": ["@maxaakre/source"],
-    "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "types": ["vite/client", "@vitest/browser-playwright"],
-    "jsx": "react-jsx",
-    "experimentalDecorators": true,
-    "useDefineForClassFields": false,
-    "verbatimModuleSyntax": true,
-    "moduleDetection": "force",
-    "skipLibCheck": true,
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noEmit": true
+    "customConditions": ["@maxaakre/source"],
+    "jsx": "react-jsx"
   },
   "include": ["src", "vite.config.ts", "vitest.config.ts"]
 }

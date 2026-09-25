@@ -1,3 +1,4 @@
+import type { LitElement } from 'lit';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { userEvent } from 'vitest/browser';
 import type { UiButton } from '@maxaakre/ui/button';
@@ -8,8 +9,22 @@ import type { DailyTodoApp } from './daily-todo-app.js';
 import type { TaskComposer } from './task-composer.js';
 import type { TaskList } from './task-list.js';
 import type { TriageView } from './triage-view.js';
+import type { Task } from './model.js';
 
 const KEY = 'daily-todo/v1';
+const LONG_AGO = '2020-01-01';
+
+/** A stored Task: open, today, order 0. Pass only what the test is about. */
+const task = (id: string, fields: Partial<Task> = {}): Task => ({
+  id, title: `Task ${id}`, status: 'open', day: currentDay(), order: 0,
+  updatedAt: '2026-01-01T00:00:00.000Z', ...fields,
+});
+
+/** A v2 storage document, as the app writes it. */
+const doc = (...tasks: Task[]) => JSON.stringify({ version: 2, tasks });
+
+/** Put Tasks in storage before mounting. */
+const seed = (...tasks: Task[]) => localStorage.setItem(KEY, doc(...tasks));
 
 const mount = async (): Promise<DailyTodoApp> => {
   document.body.innerHTML = '<daily-todo-app></daily-todo-app>';
@@ -22,6 +37,13 @@ const settle = async (app: DailyTodoApp) => {
   await app.updateComplete;
   await new Promise((r) => setTimeout(r, 0));
   await app.updateComplete;
+};
+
+/** Find an element in the app's shadow root and wait for it to render. */
+const child = async <T extends LitElement>(app: DailyTodoApp, selector: string): Promise<T> => {
+  const el = app.shadowRoot!.querySelector(selector) as unknown as T;
+  await el.updateComplete;
+  return el;
 };
 
 const stored = () => JSON.parse(localStorage.getItem(KEY)!);
@@ -40,9 +62,7 @@ describe('<daily-todo-app>', () => {
   });
 
   it('switches to the two-pane view when something is older than today', async () => {
-    localStorage.setItem(KEY, JSON.stringify({ version: 2, tasks: [
-      { id: 'a', title: 'Renew passport', status: 'open', day: '2020-01-01', order: 0, updatedAt: '2020-01-01T00:00:00.000Z' },
-    ]}));
+    seed(task('a', { title: 'Renew passport', day: LONG_AGO }));
     const app = await mount();
     expect(app.shadowRoot!.querySelector('triage-view')).not.toBeNull();
     expect(app.shadowRoot!.querySelector('h1')!.textContent).toBe('Plan today');
@@ -50,8 +70,7 @@ describe('<daily-todo-app>', () => {
 
   it('adds a Task through the composer and persists it', async () => {
     const app = await mount();
-    const composer = app.shadowRoot!.querySelector('task-composer') as TaskComposer;
-    await composer.updateComplete;
+    const composer = await child<TaskComposer>(app, 'task-composer');
     const field = composer.shadowRoot!.querySelector('ui-text-field') as UiTextField;
     await userEvent.type(field.shadowRoot!.querySelector('input')!, '  Buy oat milk  {Enter}');
     await settle(app);
@@ -64,8 +83,7 @@ describe('<daily-todo-app>', () => {
 
   it('ignores an empty submit', async () => {
     const app = await mount();
-    const composer = app.shadowRoot!.querySelector('task-composer') as TaskComposer;
-    await composer.updateComplete;
+    const composer = await child<TaskComposer>(app, 'task-composer');
     (composer.shadowRoot!.querySelector('ui-text-field') as UiTextField).value = '   ';
     await userEvent.click(composer.shadowRoot!.querySelector('ui-button')!);
     await settle(app);
@@ -73,31 +91,31 @@ describe('<daily-todo-app>', () => {
   });
 
   it('toggles a Task from the list', async () => {
-    localStorage.setItem(KEY, JSON.stringify({ version: 2, tasks: [
-      { id: 'a', title: 'Buy oat milk', status: 'open', day: currentDay(), order: 0, updatedAt: '2026-01-01T00:00:00.000Z' },
-    ]}));
+    seed(task('a', { title: 'Buy oat milk' }));
     const app = await mount();
-    const list = app.shadowRoot!.querySelector('task-list') as TaskList;
-    await list.updateComplete;
+    const list = await child<TaskList>(app, 'task-list');
     await userEvent.click(list.shadowRoot!.querySelector('ui-checkbox')!);
     await settle(app);
     expect(stored().tasks[0].status).toBe('done');
     expect(list.shadowRoot!.querySelector('ui-checkbox')!.checked).toBe(true);
   });
 
-  const twoTasks = () => localStorage.setItem(KEY, JSON.stringify({ version: 2, tasks: [
-    { id: 'a', title: 'Typo task', status: 'open', day: currentDay(), order: 0, updatedAt: '2026-01-01T00:00:00.000Z' },
-    { id: 'b', title: 'Keep me', status: 'open', day: currentDay(), order: 1, updatedAt: '2026-01-01T00:00:00.000Z' },
-  ]}));
+  const twoTasks = () => seed(task('a', { title: 'Typo task' }), task('b', { title: 'Keep me', order: 1 }));
 
   /** Click × on the first row and wait for the confirm dialog. */
   const askToErase = async (app: DailyTodoApp) => {
-    const list = app.shadowRoot!.querySelector('task-list') as TaskList;
-    await list.updateComplete;
+    const list = await child<TaskList>(app, 'task-list');
     await userEvent.click(list.shadowRoot!.querySelectorAll('ui-button')[0]);
     const dialog = list.shadowRoot!.querySelector('ui-dialog')!;
     await dialog.updateComplete;
     return { list, dialog };
+  };
+
+  /** Press Erase in the open dialog, and wait for the app and the list. */
+  const confirmErase = async (app: DailyTodoApp, list: TaskList, dialog: HTMLElement) => {
+    await userEvent.click(dialog.querySelector('[data-dialog-close=erase]')!);
+    await settle(app);
+    await list.updateComplete;
   };
 
   it('× asks first: the dialog names the Task, and nothing is erased yet', async () => {
@@ -113,9 +131,7 @@ describe('<daily-todo-app>', () => {
     twoTasks();
     const app = await mount();
     const { list, dialog } = await askToErase(app);
-    await userEvent.click(dialog.querySelector('[data-dialog-close=erase]')!);
-    await settle(app);
-    await list.updateComplete;
+    await confirmErase(app, list, dialog);
     const rows = stored().tasks as { id: string; status: string }[];
     expect(rows.map((t) => t.id)).toEqual(['a', 'b']);
     expect(rows.find((t) => t.id === 'a')!.status).toBe('erased');
@@ -129,9 +145,7 @@ describe('<daily-todo-app>', () => {
     twoTasks();
     const app = await mount();
     const { list, dialog } = await askToErase(app);
-    await userEvent.click(dialog.querySelector('[data-dialog-close=erase]')!);
-    await settle(app);
-    await list.updateComplete;
+    await confirmErase(app, list, dialog);
     const next = list.shadowRoot!.querySelector('ui-checkbox')!;
     expect(next.textContent).toContain('Keep me');
     expect(list.shadowRoot!.activeElement).toBe(next);
@@ -141,31 +155,23 @@ describe('<daily-todo-app>', () => {
     // A reload (another tab wrote) hands the list new Task objects, so the
     // erased row must be found by id, not by object identity. The middle
     // row is erased: a failed lookup (-1) would land on the first row.
-    localStorage.setItem(KEY, JSON.stringify({ version: 2, tasks: ['a', 'b', 'c'].map((id, order) => (
-      { id, title: `Task ${id}`, status: 'open', day: currentDay(), order, updatedAt: '2026-01-01T00:00:00.000Z' })) }));
+    seed(task('a'), task('b', { order: 1 }), task('c', { order: 2 }));
     const app = await mount();
-    const list = app.shadowRoot!.querySelector('task-list') as TaskList;
-    await list.updateComplete;
+    const list = await child<TaskList>(app, 'task-list');
     await userEvent.click(list.shadowRoot!.querySelectorAll('ui-button')[1]);
     const dialog = list.shadowRoot!.querySelector('ui-dialog')!;
     await dialog.updateComplete;
     list.tasks = list.tasks.map((t) => ({ ...t }));
     await list.updateComplete;
-    await userEvent.click(dialog.querySelector('[data-dialog-close=erase]')!);
-    await settle(app);
-    await list.updateComplete;
+    await confirmErase(app, list, dialog);
     expect((list.shadowRoot!.activeElement as HTMLElement).textContent).toContain('Task c');
   });
 
   it('erasing the last Task moves focus to the empty message, not <body>', async () => {
-    localStorage.setItem(KEY, JSON.stringify({ version: 2, tasks: [
-      { id: 'a', title: 'Only one', status: 'open', day: currentDay(), order: 0, updatedAt: '2026-01-01T00:00:00.000Z' },
-    ]}));
+    seed(task('a', { title: 'Only one' }));
     const app = await mount();
     const { list, dialog } = await askToErase(app);
-    await userEvent.click(dialog.querySelector('[data-dialog-close=erase]')!);
-    await settle(app);
-    await list.updateComplete;
+    await confirmErase(app, list, dialog);
     const message = list.shadowRoot!.querySelector('p')!;
     expect(message.textContent).toContain('Nothing planned yet');
     expect(list.shadowRoot!.activeElement).toBe(message);
@@ -187,25 +193,18 @@ describe('<daily-todo-app>', () => {
   });
 
   it('the erase button is labelled for screen readers', async () => {
-    localStorage.setItem(KEY, JSON.stringify({ version: 2, tasks: [
-      { id: 'a', title: 'Buy oat milk', status: 'open', day: currentDay(), order: 0, updatedAt: '2026-01-01T00:00:00.000Z' },
-    ]}));
+    seed(task('a', { title: 'Buy oat milk' }));
     const app = await mount();
-    const list = app.shadowRoot!.querySelector('task-list') as TaskList;
-    await list.updateComplete;
+    const list = await child<TaskList>(app, 'task-list');
     const erase = list.shadowRoot!.querySelector('ui-button') as UiButton;
     await erase.updateComplete;
     expect(erase.shadowRoot!.querySelector('button')!.getAttribute('aria-label')).toBe('Erase "Buy oat milk"');
   });
 
   it('triages a leftover to today, landing it at the bottom of the plan', async () => {
-    localStorage.setItem(KEY, JSON.stringify({ version: 2, tasks: [
-      { id: 'planned', title: 'Planned', status: 'open', day: currentDay(), order: 0, updatedAt: '2026-01-01T00:00:00.000Z' },
-      { id: 'old', title: 'Leftover', status: 'open', day: '2020-01-01', order: 0, updatedAt: '2020-01-01T00:00:00.000Z' },
-    ]}));
+    seed(task('planned', { title: 'Planned' }), task('old', { title: 'Leftover', day: LONG_AGO }));
     const app = await mount();
-    const triage = app.shadowRoot!.querySelector('triage-view') as TriageView;
-    await triage.updateComplete;
+    const triage = await child<TriageView>(app, 'triage-view');
     await userEvent.click(triage.shadowRoot!.querySelector('ui-button[variant=primary]')!);
     await settle(app);
 
@@ -217,12 +216,9 @@ describe('<daily-todo-app>', () => {
   });
 
   it('the Unfinished pane can be collapsed, and the plan stays usable', async () => {
-    localStorage.setItem(KEY, JSON.stringify({ version: 2, tasks: [
-      { id: 'old', title: 'Leftover', status: 'open', day: '2020-01-01', order: 0, updatedAt: '2020-01-01T00:00:00.000Z' },
-    ]}));
+    seed(task('old', { title: 'Leftover', day: LONG_AGO }));
     const app = await mount();
-    const triage = app.shadowRoot!.querySelector('triage-view') as TriageView;
-    await triage.updateComplete;
+    const triage = await child<TriageView>(app, 'triage-view');
     const pane = triage.shadowRoot!.querySelector('ui-disclosure')!;
     expect(pane.open).toBe(true);
     await userEvent.click(pane.querySelector('[slot=summary]')!);
@@ -255,17 +251,14 @@ describe('<daily-todo-app>', () => {
   });
 
   it('discards a write that would clobber another tab, and says so', async () => {
-    localStorage.setItem(KEY, JSON.stringify({ version: 2, tasks: [] }));
+    seed();
     const app = await mount();
 
     // Another tab writes directly, bypassing storage.ts.
-    const otherTab = JSON.stringify({ version: 2, tasks: [
-      { id: 'other', title: 'From another tab', status: 'open', day: currentDay(), order: 0, updatedAt: '2026-01-01T00:00:00.000Z' },
-    ]});
+    const otherTab = doc(task('other', { title: 'From another tab' }));
     localStorage.setItem(KEY, otherTab);
 
-    const composer = app.shadowRoot!.querySelector('task-composer') as TaskComposer;
-    await composer.updateComplete;
+    const composer = await child<TaskComposer>(app, 'task-composer');
     const field = composer.shadowRoot!.querySelector('ui-text-field') as UiTextField;
     await userEvent.type(field.shadowRoot!.querySelector('input')!, 'Mine{Enter}');
     await settle(app);
