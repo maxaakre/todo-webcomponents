@@ -185,7 +185,8 @@ Grows the app's existing tokens in `src/styles.css`.
 - Listed as not tested: NVDA + Firefox, JAWS.
 
 ### App
-- The app's 62 existing tests stay on happy-dom and must pass after the move.
+- The app's 62 existing tests must pass after the move.
+- **Changed during step 4:** happy-dom has no `ElementInternals`, so `elements.test.ts` runs in Chromium (Vitest browser mode). The pure logic tests stay on happy-dom.
 
 ### Out of scope
 - No visual regression screenshots.

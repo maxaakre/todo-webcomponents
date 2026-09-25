@@ -1,5 +1,6 @@
 import { LitElement, css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
+import '@maxaakre/ui/button';
 import './task-composer.js';
 import './task-list.js';
 import './triage-view.js';
@@ -17,23 +18,18 @@ import type { State, Verdict } from './model.js';
 @customElement('daily-todo-app')
 export class DailyTodoApp extends LitElement {
   static styles = css`
-    :host { display: block; max-width: 48rem; margin: 0 auto; padding: var(--gap-4) var(--gap-3); }
-    header { margin-bottom: var(--gap-3); }
+    :host { display: block; max-width: 48rem; margin: 0 auto; padding: var(--ui-space-4) var(--ui-space-3); }
+    header { margin-bottom: var(--ui-space-3); }
     h1 { margin: 0; font-size: 1.6rem; font-weight: 620; letter-spacing: -0.02em; }
-    .date { color: var(--dim); font-size: 0.85rem; }
-    task-composer { margin-bottom: var(--gap-3); }
+    .date { color: var(--ui-color-text-muted); font-size: 0.85rem; }
+    task-composer { margin-bottom: var(--ui-space-3); }
     .notice {
-      border: 1px solid var(--danger); border-radius: var(--radius);
-      padding: var(--gap-2); margin-bottom: var(--gap-3); color: var(--danger);
+      border: 1px solid var(--ui-color-danger); border-radius: var(--ui-radius-md);
+      padding: var(--ui-space-2); margin-bottom: var(--ui-space-3); color: var(--ui-color-danger);
     }
-    .error { border: 1px solid var(--line); border-radius: var(--radius); padding: var(--gap-3); }
-    .error h2 { margin: 0 0 var(--gap-2); font-size: 1.05rem; }
-    .error p { color: var(--dim); }
-    button {
-      font: inherit; cursor: pointer; border: 1px solid var(--danger);
-      background: var(--page); color: var(--danger);
-      border-radius: var(--radius); padding: 0.5rem 0.8rem;
-    }
+    .error { border: 1px solid var(--ui-color-border); border-radius: var(--ui-radius-md); padding: var(--ui-space-3); }
+    .error h2 { margin: 0 0 var(--ui-space-2); font-size: 1.05rem; }
+    .error p { color: var(--ui-color-text-muted); }
   `;
 
   private day = new DayController(this, () => this.reload());
@@ -93,7 +89,7 @@ export class DailyTodoApp extends LitElement {
           <h2>Saved data could not be opened</h2>
           <p>${this.blocked}</p>
           <p>Nothing has been deleted. Starting fresh will replace it.</p>
-          <button @click=${this.startFresh}>Start fresh</button>
+          <ui-button variant="danger" @click=${this.startFresh}>Start fresh</ui-button>
         </div>`;
     }
 

@@ -1,4 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
+import { userEvent } from 'vitest/browser';
+import type { UiButton } from '@maxaakre/ui/button';
+import type { UiTextField } from '@maxaakre/ui/text-field';
 import './daily-todo-app.js';
 import { currentDay } from './day.js';
 import type { DailyTodoApp } from './daily-todo-app.js';
@@ -49,22 +52,22 @@ describe('<daily-todo-app>', () => {
     const app = await mount();
     const composer = app.shadowRoot!.querySelector('task-composer') as TaskComposer;
     await composer.updateComplete;
-    const input = composer.shadowRoot!.querySelector('input') as HTMLInputElement;
-    input.value = '  Buy oat milk  ';
-    composer.shadowRoot!.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
+    const field = composer.shadowRoot!.querySelector('ui-text-field') as UiTextField;
+    await userEvent.type(field.shadowRoot!.querySelector('input')!, '  Buy oat milk  {Enter}');
     await settle(app);
 
     expect(stored().tasks).toHaveLength(1);
     expect(stored().tasks[0].title).toBe('Buy oat milk'); // trimmed
-    expect(input.value).toBe(''); // cleared
+    expect(field.value).toBe(''); // cleared
+    expect(field.shadowRoot!.activeElement).not.toBeNull(); // kept focus
   });
 
   it('ignores an empty submit', async () => {
     const app = await mount();
     const composer = app.shadowRoot!.querySelector('task-composer') as TaskComposer;
     await composer.updateComplete;
-    (composer.shadowRoot!.querySelector('input') as HTMLInputElement).value = '   ';
-    composer.shadowRoot!.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
+    (composer.shadowRoot!.querySelector('ui-text-field') as UiTextField).value = '   ';
+    await userEvent.click(composer.shadowRoot!.querySelector('ui-button')!);
     await settle(app);
     expect(localStorage.getItem(KEY)).toBeNull();
   });
@@ -76,9 +79,10 @@ describe('<daily-todo-app>', () => {
     const app = await mount();
     const list = app.shadowRoot!.querySelector('task-list') as TaskList;
     await list.updateComplete;
-    (list.shadowRoot!.querySelector('input[type=checkbox]') as HTMLInputElement).dispatchEvent(new Event('change'));
+    await userEvent.click(list.shadowRoot!.querySelector('ui-checkbox')!);
     await settle(app);
     expect(stored().tasks[0].status).toBe('done');
+    expect(list.shadowRoot!.querySelector('ui-checkbox')!.checked).toBe(true);
   });
 
   it('× ERASES a Task — the row survives, but it leaves the list', async () => {
@@ -89,7 +93,7 @@ describe('<daily-todo-app>', () => {
     const app = await mount();
     const list = app.shadowRoot!.querySelector('task-list') as TaskList;
     await list.updateComplete;
-    (list.shadowRoot!.querySelectorAll('button')[0] as HTMLButtonElement).click();
+    await userEvent.click(list.shadowRoot!.querySelectorAll('ui-button')[0]);
     await settle(app);
     const rows = stored().tasks as { id: string; status: string }[];
     expect(rows.map((t) => t.id)).toEqual(['a', 'b']);
@@ -104,7 +108,9 @@ describe('<daily-todo-app>', () => {
     const app = await mount();
     const list = app.shadowRoot!.querySelector('task-list') as TaskList;
     await list.updateComplete;
-    expect(list.shadowRoot!.querySelector('button')!.getAttribute('aria-label')).toBe('Erase "Buy oat milk"');
+    const erase = list.shadowRoot!.querySelector('ui-button') as UiButton;
+    await erase.updateComplete;
+    expect(erase.shadowRoot!.querySelector('button')!.getAttribute('aria-label')).toBe('Erase "Buy oat milk"');
   });
 
   it('triages a leftover to today, landing it at the bottom of the plan', async () => {
@@ -115,7 +121,7 @@ describe('<daily-todo-app>', () => {
     const app = await mount();
     const triage = app.shadowRoot!.querySelector('triage-view') as TriageView;
     await triage.updateComplete;
-    (triage.shadowRoot!.querySelector('button.primary') as HTMLButtonElement).click();
+    await userEvent.click(triage.shadowRoot!.querySelector('ui-button[variant=primary]')!);
     await settle(app);
 
     const today = stored().tasks
@@ -140,7 +146,7 @@ describe('<daily-todo-app>', () => {
     const app = await mount();
     expect(localStorage.getItem(KEY)).toBe('{not json at all');
 
-    (app.shadowRoot!.querySelector('.error button') as HTMLButtonElement).click();
+    await userEvent.click(app.shadowRoot!.querySelector('.error ui-button')!);
     await settle(app);
 
     expect(app.shadowRoot!.querySelector('.error')).toBeNull();
@@ -159,8 +165,8 @@ describe('<daily-todo-app>', () => {
 
     const composer = app.shadowRoot!.querySelector('task-composer') as TaskComposer;
     await composer.updateComplete;
-    (composer.shadowRoot!.querySelector('input') as HTMLInputElement).value = 'Mine';
-    composer.shadowRoot!.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
+    const field = composer.shadowRoot!.querySelector('ui-text-field') as UiTextField;
+    await userEvent.type(field.shadowRoot!.querySelector('input')!, 'Mine{Enter}');
     await settle(app);
 
     // The other tab's work survived, and the user was told.

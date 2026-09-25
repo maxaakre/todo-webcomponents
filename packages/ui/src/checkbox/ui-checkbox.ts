@@ -28,8 +28,10 @@ export class UiCheckbox extends FormControl {
     :host { display: inline-block; }
     :host([hidden]) { display: none; }
 
+    /* flex, not inline-flex: the label fills the host, so the click
+       target grows when a consumer stretches the checkbox. */
     label {
-      display: inline-flex; align-items: center;
+      display: flex; align-items: center;
       gap: var(--ui-space-2, 0.75rem);
       cursor: pointer;
     }

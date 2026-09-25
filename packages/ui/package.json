@@ -11,22 +11,29 @@
   ],
   "exports": {
     ".": {
+      "@maxaakre/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
     "./button": {
+      "@maxaakre/source": "./src/button/ui-button.ts",
       "types": "./dist/button/ui-button.d.ts",
       "default": "./dist/button/ui-button.js"
     },
     "./checkbox": {
+      "@maxaakre/source": "./src/checkbox/ui-checkbox.ts",
       "types": "./dist/checkbox/ui-checkbox.d.ts",
       "default": "./dist/checkbox/ui-checkbox.js"
     },
     "./text-field": {
+      "@maxaakre/source": "./src/text-field/ui-text-field.ts",
       "types": "./dist/text-field/ui-text-field.d.ts",
       "default": "./dist/text-field/ui-text-field.js"
     },
-    "./tokens.css": "./dist/tokens/tokens.css"
+    "./tokens.css": {
+      "@maxaakre/source": "./src/tokens/tokens.css",
+      "default": "./dist/tokens/tokens.css"
+    }
   },
   "files": [
     "dist",

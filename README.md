@@ -177,7 +177,7 @@ Two throwaway branches hold primary sources. Neither is merged, by design — `m
 
 ## Tests
 
-`pnpm test` — **62 tests**, Vitest with happy-dom.
+`pnpm test` — **62 app tests**, in two Vitest projects: pure logic on happy-dom, and `elements.test.ts` in real Chromium. The split exists because happy-dom has no `ElementInternals`, and the app's form controls come from `@maxaakre/ui`, which is form-associated. The library has its own suite (`packages/ui`).
 
 They concentrate on the places that fail **silently**:
 

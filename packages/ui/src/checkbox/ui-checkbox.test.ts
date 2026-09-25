@@ -44,6 +44,12 @@ describe('ui-checkbox: label', () => {
     expect(el.checked).toBe(true);
   });
 
+  it('the click target fills the host, so a stretched checkbox is clickable anywhere', async () => {
+    const el = await fixture<UiCheckbox>(html`<ui-checkbox style="display:block; width:400px">Done</ui-checkbox>`);
+    await userEvent.click(el, { position: { x: 390, y: 5 } });
+    expect(el.checked).toBe(true);
+  });
+
   it('warns in dev when it has no label text', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     await fixture<UiCheckbox>(html`<ui-checkbox></ui-checkbox>`);

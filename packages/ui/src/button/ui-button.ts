@@ -37,7 +37,8 @@ export class UiButton extends FormControl {
 
       display: inline-flex; align-items: center; justify-content: center;
       gap: var(--ui-button-gap, var(--ui-space-1, 0.35rem));
-      inline-size: 100%;
+      /* Fill the host, so a consumer can size ui-button like any box. */
+      inline-size: 100%; block-size: 100%;
       font: inherit; line-height: 1; cursor: pointer;
       color: var(--_fg); background: var(--_bg);
       border: 1px solid var(--_border);

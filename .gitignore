@@ -27,3 +27,6 @@ dist-ssr
 
 # Agent worktrees
 .claude/worktrees/
+
+# Vitest browser-mode failure screenshots
+.vitest/
