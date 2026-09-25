@@ -28,6 +28,16 @@ import '@maxaakre/ui/button';       // registers <ui-button>
 
 Each component folder has a README with its decisions, keyboard contract and screen-reader log. The full API is in `custom-elements.json`.
 
+## React 19
+
+Types for JSX, generated from the manifest. Import once:
+
+```ts
+import type {} from '@maxaakre/ui/react';
+```
+
+Props become properties (`checked`, `selectedIndex`). Custom events use `on` plus the exact name: `onui-close`, `onui-toggle`, `onui-tab-change`.
+
 ## Theming
 
 Override the semantic tokens (`--ui-color-*`) on any ancestor, or force a theme with `data-theme="light"` or `data-theme="dark"`. Components also read one `--ui-<component>-*` property each, and expose a few `::part`s.

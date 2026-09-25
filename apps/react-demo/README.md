@@ -19,7 +19,7 @@ pnpm --filter react-demo test   # 10 tests, real Chromium
 
 ## Typing
 
-`src/custom-elements.d.ts` adds the elements to `React.JSX.IntrinsicElements`, typed from the library's own classes and event types.
+One line: `import type {} from '@maxaakre/ui/react'`. The library **generates** those JSX types from its `custom-elements.json` (`scripts/react-types.js`), so they cannot drift from the components. CI fails if they are stale. A wrong `variant`, or a wrong field on an event's `detail`, is a type error.
 
 ## React 18 and older
 

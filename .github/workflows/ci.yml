@@ -33,10 +33,11 @@ jobs:
       - run: pnpm test
       - run: pnpm build
 
-      # The manifest is committed so API changes show up in review.
-      # Fail if a component changed without regenerating it.
-      - name: Manifest is up to date
-        run: git diff --exit-code -- packages/ui/custom-elements.json
+      # The manifest and the React types generated from it are committed,
+      # so API changes show up in review. Fail if a component changed
+      # without regenerating them.
+      - name: Manifest and React types are up to date
+        run: git diff --exit-code -- packages/ui/custom-elements.json packages/ui/src/react.d.ts
 
       - run: pnpm --filter @maxaakre/ui build-storybook --quiet
 

@@ -45,6 +45,10 @@
       "types": "./dist/text-field/ui-text-field.d.ts",
       "default": "./dist/text-field/ui-text-field.js"
     },
+    "./react": {
+      "@maxaakre/source": "./src/react.d.ts",
+      "types": "./dist/react.d.ts"
+    },
     "./tokens.css": {
       "@maxaakre/source": "./src/tokens/tokens.css",
       "default": "./dist/tokens/tokens.css"
@@ -57,8 +61,8 @@
   ],
   "customElements": "custom-elements.json",
   "scripts": {
-    "build": "tsc -p tsconfig.build.json && node scripts/copy-css.js && pnpm manifest",
-    "manifest": "cem analyze",
+    "build": "tsc -p tsconfig.build.json && pnpm manifest && node scripts/copy-assets.js",
+    "manifest": "cem analyze && node scripts/react-types.js",
     "typecheck": "tsc --noEmit",
     "lint": "node scripts/lint.js",
     "test": "vitest run",
@@ -68,6 +72,7 @@
     "smoke-storybook": "node scripts/smoke-storybook.js"
   },
   "peerDependencies": {
+    "@types/react": "^19.0.0",
     "lit": "^3.3.0"
   },
   "devDependencies": {
@@ -75,6 +80,7 @@
     "@storybook/addon-a11y": "^10.6.0",
     "@storybook/addon-docs": "^10.6.0",
     "@storybook/web-components-vite": "^10.6.0",
+    "@types/react": "^19.3.0",
     "@vitest/browser-playwright": "5.0.1",
     "axe-core": "^4.13.0",
     "lit": "^3.3.3",
@@ -85,5 +91,10 @@
     "typescript": "~6.0.3",
     "vite": "^8.3.0",
     "vitest": "5.0.1"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    }
   }
 }
