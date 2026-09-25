@@ -14,9 +14,11 @@ The app is also a **learning vehicle for Lit and web components**, so idiomatic 
 
 | | |
 |---|---|
-| Design decisions | **9 of 9 resolved** |
-| The app | ✅ built, matches the design |
-| Tests | ✅ **227 passing**: 68 app, 149 library, 10 React demo |
+| The app | ✅ built, matches the design ([9 of 9 decisions](.scratch/daily-todo/map.md)) |
+| Component library | ✅ `@maxaakre/ui`: 6 components, Storybook, tokens ([spec](./docs/superpowers/specs/2026-09-25-ui-library-design.md)) |
+| Tests | ✅ **227 passing**: 68 app, 149 library, 10 React demo. CI runs them on every push |
+| Multi-device sync | 🧭 planning: [5 of 13 tickets resolved](.scratch/multi-device-sync/map.md) |
+| Deployment | ⏳ ready (`vercel.json`); waits on connecting a Vercel account |
 
 Also verified by hand in a browser: dark mode, and the full triage flow end to end.
 
@@ -37,20 +39,38 @@ Then open **http://localhost:5173/**.
 
 | Command | Does |
 |---|---|
-| `pnpm dev` | Dev server with hot reload |
-| `pnpm storybook` | The component library's Storybook |
-| `pnpm build` | Typecheck (`tsc`) then bundle (`vite build`), for every workspace package |
-| `pnpm preview` | Serve the production build locally |
-| `pnpm test` | Run the test suite once |
-| `pnpm test:watch` | Run tests in watch mode |
+| `pnpm dev` | The app, with hot reload |
+| `pnpm storybook` | The component library's Storybook, on http://localhost:6006 |
+| `pnpm --filter react-demo dev` | The React 19 demo |
+| `pnpm build` | Typecheck and build every package |
+| `pnpm preview` | Serve the app's production build locally |
+| `pnpm test` | Every package's tests, once |
+| `pnpm test:watch` | The app's tests, in watch mode |
+| `pnpm typecheck` · `pnpm lint` | What CI runs before the tests |
+| `pnpm changeset` | Record a change to `@maxaakre/ui` for the next release |
 
 ### Layout
 
 A pnpm workspace. Run every command from the repo root.
 
+```mermaid
+flowchart LR
+  ui["<b>packages/ui</b><br/>@maxaakre/ui<br/>6 components + tokens"]
+  todo["<b>apps/daily-todo</b><br/>the app (Lit)"]
+  react["<b>apps/react-demo</b><br/>React 19 consumer"]
+  sb["<b>Storybook</b><br/>docs, guides, ADRs"]
+
+  ui -- "TypeScript source<br/>(@maxaakre/source condition)" --> todo
+  ui -- "TypeScript source" --> react
+  ui --> sb
+  ui -. "npm: dist/ only" .-> npm[("published package")]
+```
+
 - **`apps/daily-todo/`** — the app
-- **`packages/ui/`** — `@maxaakre/ui` 0.1.0, the component library pulled out of this app: 6 components, Storybook, tokens. See [its README](./packages/ui/README.md) and [the spec](./docs/superpowers/specs/2026-09-25-ui-library-design.md)
+- **`packages/ui/`** — `@maxaakre/ui`, the component library pulled out of this app. See [its README](./packages/ui/README.md) and [the spec](./docs/superpowers/specs/2026-09-25-ui-library-design.md)
 - **`apps/react-demo/`** — every component used from React 19, with tests
+
+Inside the workspace, both apps read the library's **TypeScript source**, so there is no library build step and edits hot-reload. Published consumers get `dist/`. (Why: [ADR 0005](./packages/ui/src/docs/decisions/0005-source-condition.mdx).)
 
 ### Versions
 
@@ -64,7 +84,7 @@ A pnpm workspace. Run every command from the repo root.
 
 Defined properly in [`CONTEXT.md`](./CONTEXT.md). In short:
 
-- **Task** — one thing to do. Title, done, a Day, a position.
+- **Task** — one thing to do. A title, a status, a Day, a position.
 - **Day** — a dated bucket of Tasks. The unit you plan in.
 - **Today** — whatever `currentDay()` resolves to. Not simply the calendar date.
 - **Triage** — deciding the fate of Tasks left unfinished on an earlier Day.
@@ -74,7 +94,18 @@ Defined properly in [`CONTEXT.md`](./CONTEXT.md). In short:
 1. You open the app. Anything **unfinished from any earlier Day** is pulled in front of you — not just yesterday, so a skipped weekend cannot orphan Friday's work.
 2. **Triage** shows two panes: unfinished work on the left, today's plan filling up on the right. Each leftover gets one of three verdicts — **Today**, **Tomorrow**, or **Drop**.
 3. Once nothing is older than today, the view **collapses to a single-column Today** list. Triage is the transient state, not the resting one.
-4. Triage never blocks you. Today stays visible and usable throughout.
+4. Triage never blocks you. Today stays visible and usable throughout. The leftovers pane can be collapsed, which helps on a phone, where the two panes stack.
+
+```mermaid
+stateDiagram-v2
+  direction LR
+  [*] --> Today: nothing unfinished<br/>from an earlier Day
+  [*] --> Triage: something unfinished<br/>from an earlier Day
+  Triage --> Today: last leftover sorted<br/>(Today / Tomorrow / Drop)
+  Today --> Triage: a new day starts<br/>with work left over
+  [*] --> ReadOnly: saved data unreadable
+  ReadOnly --> Today: Start fresh (a click)
+```
 
 Tasks moved into today land at the **bottom** of the plan — what you chose deliberately keeps its place.
 
@@ -85,23 +116,25 @@ A Task can also be **erased** from the list with the ✕ button. It **asks first
 Everything lives in `localStorage` under **one key**:
 
 ```ts
-"daily-todo/v1" → { version: 1, tasks: Task[] }
+"daily-todo/v1" → { version: 2, tasks: Task[] }
 
 type Task = {
   id: string;        // crypto.randomUUID()
   title: string;
-  done: boolean;
+  status: 'open' | 'done' | 'abandoned' | 'erased';
   day: string;       // "YYYY-MM-DD" — a LABEL
   order: number;     // integer, renumbered within a Day
   updatedAt: string; // ISO 8601 — an absolute INSTANT
 }
 ```
 
+**Nothing is ever removed from the array.** Drop sets `abandoned`, ✕ sets `erased`; both stay as tombstones so a future sync cannot resurrect them. A v1 document (with `done: boolean`) is migrated on read and left untouched on disk until the next save. The storage key keeps its `v1` name; the version lives inside.
+
 A **Day is derived, not stored** — it is just a filter on `day`, so the two can never disagree.
 
 `day` and `updatedAt` are deliberately different kinds of time. `day` is a label a future day-start setting could shift. `updatedAt` is an absolute instant and nothing about day handling may touch it.
 
-**Single user, single device.** Multi-device sync is deferred, not abandoned — `id` and `updatedAt` exist so it stays possible without a rewrite.
+**Single user, single device, for now.** Multi-device sync is being planned in [its own map](.scratch/multi-device-sync/map.md). `id`, `updatedAt` and the tombstones exist so it needs no rewrite.
 
 ### Safety rules
 
@@ -114,17 +147,50 @@ A **Day is derived, not stored** — it is just a filter on `day`, so the two ca
 
 ### Elements
 
-```
-<daily-todo-app>      root. Owns State, hosts DayController,
- │                    the ONLY caller of store.ts and storage.ts
- ├─ <task-composer>   the input        → task-added   { title }
- ├─ <triage-view>     two-pane         → task-triaged { id, verdict }
- │   └─ <task-list>   right pane
- └─ <task-list>       single column    → task-toggled { id }
-                                       → task-deleted { id }
+The app's own elements, and the `@maxaakre/ui` components (`ui-*`) each one uses:
+
+```mermaid
+flowchart TD
+  app["<b>&lt;daily-todo-app&gt;</b><br/>root: owns State, hosts DayController<br/>the ONLY caller of store.ts and storage.ts"]
+  composer["<b>&lt;task-composer&gt;</b><br/>ui-text-field · ui-button"]
+  triage["<b>&lt;triage-view&gt;</b> two panes<br/>ui-disclosure · ui-button"]
+  listT["<b>&lt;task-list&gt;</b><br/>right pane"]
+  list["<b>&lt;task-list&gt;</b> single column<br/>ui-checkbox · ui-button · ui-dialog"]
+
+  app --> composer
+  app -- "while something is left over" --> triage
+  app -- "otherwise" --> list
+  triage --> listT
 ```
 
-**Props down, events up.** No `@lit/context`, no signals. Child elements never mutate state — they dispatch a verdict and the root applies it.
+Each child sends one kind of event up to the root:
+
+| Element | Event | When |
+|---|---|---|
+| `<task-composer>` | `task-added { title }` | Add, or Enter in the field |
+| `<triage-view>` | `task-triaged { id, verdict }` | → Today, Tomorrow or Drop |
+| `<task-list>` | `task-toggled { id }` | The checkbox |
+| `<task-list>` | `task-erased { id }` | ✕, then **Erase** in the confirm dialog |
+
+**Props down, events up.** No `@lit/context`, no signals. Child elements never mutate state — they dispatch a verdict and the root applies it:
+
+```mermaid
+sequenceDiagram
+  participant El as child element
+  participant App as daily-todo-app
+  participant Store as store.ts (pure)
+  participant Storage as storage.ts
+  El->>App: event, e.g. task-erased { id }
+  App->>Store: op(state) returns next State
+  App->>Storage: save(next)
+  alt saved
+    Storage-->>App: ok
+    App->>El: re-render with next State (props down)
+  else another tab wrote first
+    Storage-->>App: refused
+    App->>App: reload, and say so in a notice
+  end
+```
 
 ### Plain TypeScript modules (no Lit imports)
 
@@ -138,9 +204,9 @@ A **Day is derived, not stored** — it is just a filter on `day`, so the two ca
 
 ### Styling
 
-One global stylesheet holds the page reset and a token set on `:root`. Elements keep their own `static styles` and consume the tokens — **CSS custom properties are the one thing that crosses the shadow boundary**.
+Design tokens come from **`@maxaakre/ui/tokens.css`**; the app's own `styles.css` holds only the page reset. Elements keep their own `static styles` and read the `--ui-*` tokens: **CSS custom properties are the one thing that crosses the shadow boundary**.
 
-Dark mode follows the OS via `prefers-color-scheme`. No in-app toggle.
+Each colour is written once as `light-dark(light, dark)`, so dark mode follows the OS through `color-scheme`. No in-app toggle.
 
 ---
 
@@ -155,7 +221,7 @@ this.tasks = [...this.tasks, task];  // re-renders
 this.tasks.push(task);               // silently does nothing
 ```
 
-**2. `useDefineForClassFields: false` is load-bearing.** In `tsconfig.json` it looks like cruft. Flip it to `true` and standard class-field semantics overwrite the accessors `@property` and `@state` install. Reactivity dies quietly. Do not "clean this up".
+**2. `useDefineForClassFields: false` is load-bearing.** In `tsconfig.base.json` it looks like cruft. Flip it to `true` and standard class-field semantics overwrite the accessors `@property` and `@state` install. Reactivity dies quietly. Do not "clean this up".
 
 **3. Forgetting to save loses data.** Only the root's single apply-and-save funnel may call `store.ts` and `storage.ts`. Skip the save, or ignore the fact that `save()` can fail, and changes vanish with no warning.
 
@@ -163,19 +229,21 @@ this.tasks.push(task);               // silently does nothing
 
 ## Where the decisions live
 
-The design was worked out as a **wayfinder map** in `.scratch/daily-todo/`:
+Three places, one per kind of decision:
 
-- **[`map.md`](.scratch/daily-todo/map.md)** — the destination, one line per decision, plus what is still fog and what is out of scope
-- **`issues/01`–`09`** — one decision per ticket, each with the reasoning and the rejected alternatives
+- **The app:** a **wayfinder map** in [`.scratch/daily-todo/`](.scratch/daily-todo/map.md). One decision per ticket (`issues/01`–`09`), each with its reasoning and the rejected alternatives.
+- **Multi-device sync:** a second map, [`.scratch/multi-device-sync/`](.scratch/multi-device-sync/map.md), still in progress.
+- **The component library:** [the spec](./docs/superpowers/specs/2026-09-25-ui-library-design.md), each component's README, and five ADRs in Storybook (**Decisions**).
 
-If you want to know *why* something is the way it is, the ticket says so.
+If you want to know *why* something is the way it is, the ticket, README or ADR says so.
 
 ### Branches
 
-Two throwaway branches hold primary sources. Neither is merged, by design — `master` keeps only the decisions.
+Throwaway branches hold primary sources. None is merged, by design: `main` keeps only the decisions.
 
-- **`prototype/triage-flow`** — the three Triage designs that were compared before picking the two-pane sorter. Run with `pnpm prototype`.
+- **`prototype/triage-flow`** — the three Triage designs that were compared before picking the two-pane sorter. Check it out and run `pnpm prototype`.
 - **`research/lit-state-architecture`** — the cited report behind the props-down/events-up choice.
+- **`research/sync-engines`** — the cited report behind sync ticket 03 (roll our own sync).
 
 ## Tests
 
@@ -194,4 +262,6 @@ The suite was **mutation-checked**: making a moved Task land at the top, switchi
 
 **Multi-user and accounts.**
 
-Parked for later: multi-device sync, History and Backlog views, routing, keyboard and accessibility, deployment.
+Parked for later: History, Backlog and Upcoming views, and the routing they would need.
+
+No longer parked: **keyboard and accessibility** (every control now comes from `@maxaakre/ui`, tested with keyboard and axe in a real browser), **deployment** (ready, see Status), and **multi-device sync** (being planned).
