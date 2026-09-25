@@ -601,6 +601,114 @@
     },
     {
       "kind": "javascript-module",
+      "path": "src/disclosure/ui-disclosure.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "Show and hide a section. Built on native `<details>` and `<summary>`, so\nthe button role, expanded state, Enter/Space and find-in-page come from\nthe platform.",
+          "name": "UiDisclosure",
+          "cssProperties": [
+            {
+              "description": "Space between summary and content.",
+              "name": "--ui-disclosure-gap",
+              "default": "var(--ui-space-2)"
+            }
+          ],
+          "cssParts": [
+            {
+              "description": "The native `<summary>`.",
+              "name": "summary"
+            },
+            {
+              "description": "The wrapper around the default slot.",
+              "name": "content"
+            }
+          ],
+          "slots": [
+            {
+              "description": "The always-visible label. Keep it short, and text only: `<summary>` acts as a button, so headings or links inside it are lost.",
+              "name": "summary"
+            },
+            {
+              "description": "The content that is shown and hidden.",
+              "name": ""
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "open",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Reflected, so `ui-disclosure[open]` works in CSS. Kept in sync with the native `<details>`.",
+              "attribute": "open",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "details",
+              "type": {
+                "text": "HTMLDetailsElement"
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "onToggle",
+              "privacy": "private"
+            }
+          ],
+          "events": [
+            {
+              "name": "ui-toggle",
+              "type": {
+                "text": "UiToggleEvent"
+              },
+              "description": "The user opened or closed it. `detail.open` is the new state. Not fired when `open` is set in code."
+            }
+          ],
+          "attributes": [
+            {
+              "name": "open",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Reflected, so `ui-disclosure[open]` works in CSS. Kept in sync with the native `<details>`.",
+              "fieldName": "open"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "ui-disclosure",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "UiDisclosure",
+          "declaration": {
+            "name": "UiDisclosure",
+            "module": "src/disclosure/ui-disclosure.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-disclosure",
+          "declaration": {
+            "name": "UiDisclosure",
+            "module": "src/disclosure/ui-disclosure.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
       "path": "src/text-field/ui-text-field.ts",
       "declarations": [
         {

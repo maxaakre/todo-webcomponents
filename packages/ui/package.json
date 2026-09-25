@@ -25,6 +25,11 @@
       "types": "./dist/checkbox/ui-checkbox.d.ts",
       "default": "./dist/checkbox/ui-checkbox.js"
     },
+    "./disclosure": {
+      "@maxaakre/source": "./src/disclosure/ui-disclosure.ts",
+      "types": "./dist/disclosure/ui-disclosure.d.ts",
+      "default": "./dist/disclosure/ui-disclosure.js"
+    },
     "./text-field": {
       "@maxaakre/source": "./src/text-field/ui-text-field.ts",
       "types": "./dist/text-field/ui-text-field.d.ts",

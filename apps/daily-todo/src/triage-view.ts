@@ -1,6 +1,7 @@
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import '@maxaakre/ui/button';
+import '@maxaakre/ui/disclosure';
 import './task-list.js';
 import type { Task, Verdict } from './model.js';
 
@@ -22,6 +23,14 @@ export class TriageView extends LitElement {
       margin: 0 0 var(--ui-space-2); font-size: 0.78rem; font-weight: 620;
       text-transform: uppercase; letter-spacing: 0.08em; color: var(--ui-color-text-muted);
     }
+    /* The Unfinished pane collapses (useful once the panes stack on a
+       phone). Its summary gets the h2 look through ::part, so the chevron
+       scales with the text. */
+    ui-disclosure::part(summary) {
+      font-size: 0.78rem; font-weight: 620;
+      text-transform: uppercase; letter-spacing: 0.08em; color: var(--ui-color-text-muted);
+    }
+    .col:has(> ui-disclosure:not([open])) { min-height: 0; }
     ul { list-style: none; margin: 0; padding: 0; }
     li { padding: 0.55rem 0; border-bottom: 1px solid var(--ui-color-border); }
     li:last-child { border-bottom: 0; }
@@ -50,8 +59,9 @@ export class TriageView extends LitElement {
     return html`
       <div class="cols">
         <div class="col">
-          <h2>Unfinished (${this.leftovers.length})</h2>
-          <ul>
+          <ui-disclosure open>
+            <span slot="summary">Unfinished (${this.leftovers.length})</span>
+            <ul>
             ${this.leftovers.map((t) => html`
               <li>
                 <div class="row">
@@ -64,7 +74,8 @@ export class TriageView extends LitElement {
                   <ui-button size="sm" variant="ghost" @click=${() => this.act(t.id, 'drop')}>Drop</ui-button>
                 </div>
               </li>`)}
-          </ul>
+            </ul>
+          </ui-disclosure>
         </div>
         <div class="col plan">
           <h2>Today's plan (${this.todays.length})</h2>

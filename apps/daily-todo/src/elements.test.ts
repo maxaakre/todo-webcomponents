@@ -131,6 +131,22 @@ describe('<daily-todo-app>', () => {
     expect(today).toEqual(['planned', 'old']);
   });
 
+  it('the Unfinished pane can be collapsed, and the plan stays usable', async () => {
+    localStorage.setItem(KEY, JSON.stringify({ version: 2, tasks: [
+      { id: 'old', title: 'Leftover', status: 'open', day: '2020-01-01', order: 0, updatedAt: '2020-01-01T00:00:00.000Z' },
+    ]}));
+    const app = await mount();
+    const triage = app.shadowRoot!.querySelector('triage-view') as TriageView;
+    await triage.updateComplete;
+    const pane = triage.shadowRoot!.querySelector('ui-disclosure')!;
+    expect(pane.open).toBe(true);
+    await userEvent.click(pane.querySelector('[slot=summary]')!);
+    await new Promise((r) => setTimeout(r, 0));
+    expect(pane.open).toBe(false);
+    expect(triage.shadowRoot!.querySelector('ui-button[variant=primary]')!.checkVisibility()).toBe(false);
+    expect(triage.shadowRoot!.querySelector('task-list')!.checkVisibility()).toBe(true);
+  });
+
   it('shows the read-only error screen on an unrecognised version, and writes nothing', async () => {
     const raw = JSON.stringify({ version: 99, tasks: [{ id: 'precious' }] });
     localStorage.setItem(KEY, raw);
