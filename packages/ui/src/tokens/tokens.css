@@ -1,0 +1,105 @@
+/*
+ * @maxaakre/ui design tokens.
+ *
+ * Three tiers:
+ *   1. Primitive  --ui-<hue>-<step>     raw values. Components never read these.
+ *   2. Semantic   --ui-color-<role>     meaning. Themes override only this tier.
+ *   3. Component  --ui-<component>-*    defined inside each component, with a
+ *                                       fallback to tier 2.
+ *
+ * Custom properties inherit through shadow DOM, which is why they are the
+ * theming API. Themes: prefers-color-scheme by default, or data-theme on
+ * any ancestor to force one.
+ */
+
+/* ── Tier 1: primitives ─────────────────────────────────────────────── */
+:root {
+  --ui-gray-0: #ffffff;
+  --ui-gray-50: #f8fafc;
+  --ui-gray-200: #e5e7eb;
+  --ui-gray-500: #7c8491;
+  --ui-gray-600: #5b6270;
+  --ui-gray-900: #16181d;
+
+  --ui-night-950: #0d1117;
+  --ui-night-900: #121519;
+  --ui-night-800: #1a1e24;
+  --ui-night-700: #2c313a;
+  --ui-night-500: #6b7382;
+  --ui-night-300: #9aa2b1;
+  --ui-night-100: #e8eaed;
+
+  --ui-blue-600: #2563eb;
+  --ui-blue-400: #5b8cff;
+  --ui-red-700: #b91c1c;
+  --ui-red-400: #f87171;
+
+  --ui-space-1: 0.35rem;
+  --ui-space-2: 0.75rem;
+  --ui-space-3: 1.25rem;
+  --ui-space-4: 2rem;
+
+  --ui-radius-sm: 6px;
+  --ui-radius-md: 10px;
+
+  --ui-font-family: -apple-system, system-ui, "Segoe UI", sans-serif;
+  --ui-font-size: 15px;
+  --ui-line-height: 1.5;
+
+  --ui-duration: 150ms;
+}
+
+/* ── Tier 2: semantic, light ────────────────────────────────────────── */
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+  --ui-color-bg: var(--ui-gray-0);
+  --ui-color-surface: var(--ui-gray-50);
+  --ui-color-text: var(--ui-gray-900);
+  --ui-color-text-muted: var(--ui-gray-600);
+  /* Decorative dividers. Not required to meet 3:1. */
+  --ui-color-border: var(--ui-gray-200);
+  /* Borders that identify a control (WCAG 1.4.11): at least 3:1. */
+  --ui-color-border-strong: var(--ui-gray-500);
+  --ui-color-accent: var(--ui-blue-600);
+  --ui-color-on-accent: var(--ui-gray-0);
+  --ui-color-danger: var(--ui-red-700);
+  --ui-color-on-danger: var(--ui-gray-0);
+  --ui-color-focus: var(--ui-blue-600);
+}
+
+/* ── Tier 2: semantic, dark ─────────────────────────────────────────── */
+/* Written twice on purpose: once for the OS setting, once for data-theme.
+   CSS cannot share a declaration block between a media query and a
+   selector. The contrast test checks both copies. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ui-color-bg: var(--ui-night-900);
+    --ui-color-surface: var(--ui-night-800);
+    --ui-color-text: var(--ui-night-100);
+    --ui-color-text-muted: var(--ui-night-300);
+    --ui-color-border: var(--ui-night-700);
+    --ui-color-border-strong: var(--ui-night-500);
+    --ui-color-accent: var(--ui-blue-400);
+    --ui-color-on-accent: var(--ui-night-950);
+    --ui-color-danger: var(--ui-red-400);
+    --ui-color-on-danger: var(--ui-night-950);
+    --ui-color-focus: var(--ui-blue-400);
+  }
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --ui-color-bg: var(--ui-night-900);
+  --ui-color-surface: var(--ui-night-800);
+  --ui-color-text: var(--ui-night-100);
+  --ui-color-text-muted: var(--ui-night-300);
+  --ui-color-border: var(--ui-night-700);
+  --ui-color-border-strong: var(--ui-night-500);
+  --ui-color-accent: var(--ui-blue-400);
+  --ui-color-on-accent: var(--ui-night-950);
+  --ui-color-danger: var(--ui-red-400);
+  --ui-color-on-danger: var(--ui-night-950);
+  --ui-color-focus: var(--ui-blue-400);
+}

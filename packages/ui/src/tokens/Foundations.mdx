@@ -1,0 +1,50 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Foundations/Tokens" />
+
+# Tokens
+
+Three tiers. Components read only tiers 2 and 3.
+
+| Tier | Pattern | Example | Who changes it |
+|---|---|---|---|
+| **1. Primitive** | `--ui-<hue>-<step>` | `--ui-blue-600` | The design system |
+| **2. Semantic** | `--ui-color-<role>` | `--ui-color-accent` | Themes |
+| **3. Component** | `--ui-<component>-*` | `--ui-button-radius` | One consumer, one component |
+
+Custom properties **inherit through shadow DOM**. That is why they are the theming API.
+
+## Using them
+
+```js
+import '@maxaakre/ui/tokens.css';
+```
+
+Every component also has fallbacks, so it still renders without this file.
+
+## Themes
+
+- Default: follows `prefers-color-scheme`.
+- Force one: `data-theme="light"` or `data-theme="dark"` on any ancestor.
+- Custom: override tier 2 on a wrapper.
+
+## Semantic colours
+
+export const roles = ['bg','surface','text','text-muted','border','border-strong','accent','on-accent','danger','on-danger','focus'];
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
+  {roles.map((r) => (
+    <div key={r} style={{ border: '1px solid var(--ui-color-border)', borderRadius: 8, overflow: 'hidden' }}>
+      <div style={{ height: 48, background: `var(--ui-color-${r})` }} />
+      <code style={{ display: 'block', padding: 8, fontSize: 12 }}>--ui-color-{r}</code>
+    </div>
+  ))}
+</div>
+
+## Contrast
+
+Enforced by `tokens.test.ts`, in both themes:
+
+- Text pairs: **4.5:1** (WCAG 1.4.3).
+- `border-strong` and `focus`: **3:1** (WCAG 1.4.11).
+- `border` is decorative only. Never use it as the only edge of a control.

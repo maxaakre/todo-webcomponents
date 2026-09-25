@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Browser tests in packages/ui need a real Chromium.
+      - run: pnpm --filter @maxaakre/ui exec playwright install --with-deps chromium
+
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm build
+
+      # The manifest is committed so API changes show up in review.
+      # Fail if a component changed without regenerating it.
+      - name: Manifest is up to date
+        run: git diff --exit-code -- packages/ui/custom-elements.json
+
+      - run: pnpm --filter @maxaakre/ui build-storybook --quiet
+
+      - name: Package is publishable
+        run: pnpm --filter @maxaakre/ui publish --dry-run --no-git-checks
