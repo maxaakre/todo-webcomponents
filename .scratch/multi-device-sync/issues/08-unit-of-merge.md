@@ -1,7 +1,7 @@
 # 08 — What is the unit of merge, and what happens to a discarded write?
 
 Type: grilling
-Status: open
+Status: claimed
 Blocked by: 03, 04, 05
 Map: ../map.md
 
