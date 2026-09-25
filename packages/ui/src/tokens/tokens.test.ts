@@ -32,7 +32,7 @@ describe.each(['light', 'dark'])('%s theme', (theme) => {
     el.dataset.theme = theme;
     document.body.append(el);
     const read = (role: string) => getComputedStyle(el).getPropertyValue(`--ui-color-${role}`).trim();
-    const ratio = contrastRatio(read(fg), read(bg));
+    const ratio = contrastRatio(read(fg), read(bg), el);
     el.remove();
     expect(ratio).toBeGreaterThanOrEqual(min);
   });

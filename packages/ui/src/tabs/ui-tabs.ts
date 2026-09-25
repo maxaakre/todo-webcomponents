@@ -1,7 +1,8 @@
 import { LitElement, css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { customElement } from '../internal/define.js';
-import { DEV } from '../internal/dev.js';
+import { base } from '../internal/styles.js';
+import { warnOnce } from '../internal/warn.js';
 
 export type UiTabChangeEvent = CustomEvent<{ index: number; value: string }>;
 
@@ -19,29 +20,28 @@ const ensureId = (el: HTMLElement, prefix: string) => {
  */
 @customElement('ui-tab')
 export class UiTab extends LitElement {
-  static styles = css`
+  static styles = [base, css`
     :host {
       display: inline-flex; align-items: center;
       padding: 0.5rem 0.9rem; cursor: pointer; user-select: none;
-      color: var(--ui-color-text-muted, #5b6270);
+      color: var(--_color-text-muted);
       border-block-end: 2px solid transparent;
       margin-block-end: -1px; /* sit on the tab list's border */
     }
     :host([selected]) {
-      color: var(--ui-color-text, #16181d);
-      border-block-end-color: var(--ui-color-accent, #2563eb);
+      color: var(--_color-text);
+      border-block-end-color: var(--_color-accent);
       font-weight: 560;
     }
-    :host(:hover) { color: var(--ui-color-text, #16181d); }
+    :host(:hover) { color: var(--_color-text); }
     :host(:focus-visible) {
-      outline: 2px solid var(--ui-color-focus, #2563eb); outline-offset: -2px;
-      border-radius: var(--ui-radius-sm, 6px);
+      outline: var(--_focus-ring); outline-offset: -2px;
+      border-radius: var(--_radius-sm);
     }
     @media (forced-colors: active) {
       :host([selected]) { border-block-end-color: Highlight; }
-      :host(:focus-visible) { outline-color: Highlight; }
     }
-  `;
+  `];
 
   /** Set by `<ui-tabs>`. Reflected for styling. Change the selection on `<ui-tabs>`, not here. */
   @property({ type: Boolean, reflect: true }) selected = false;
@@ -75,14 +75,13 @@ export class UiTab extends LitElement {
  */
 @customElement('ui-tab-panel')
 export class UiTabPanel extends LitElement {
-  static styles = css`
-    :host { display: block; padding-block: var(--ui-space-3, 1.25rem); }
-    :host([hidden]) { display: none; }
+  static styles = [base, css`
+    :host { display: block; padding-block: var(--_space-3); }
     :host(:focus-visible) {
-      outline: 2px solid var(--ui-color-focus, #2563eb); outline-offset: 2px;
-      border-radius: var(--ui-radius-sm, 6px);
+      outline: var(--_focus-ring); outline-offset: 2px;
+      border-radius: var(--_radius-sm);
     }
-  `;
+  `];
 
   connectedCallback() {
     super.connectedCallback();
@@ -123,13 +122,13 @@ export class UiTabPanel extends LitElement {
  */
 @customElement('ui-tabs')
 export class UiTabs extends LitElement {
-  static styles = css`
+  static styles = [base, css`
     :host { display: block; }
     [part='tablist'] {
-      display: flex; gap: var(--ui-space-1, 0.35rem);
-      border-block-end: 1px solid var(--ui-color-border, #e5e7eb);
+      display: flex; gap: var(--_space-1);
+      border-block-end: 1px solid var(--_color-border);
     }
-  `;
+  `];
 
   /** Accessible name of the tab list. Required: there may be several tab sets on a page. */
   @property() label = '';
@@ -148,8 +147,8 @@ export class UiTabs extends LitElement {
   /** Wire ids, selection, visibility and tabindex. Runs on every render and slot change. */
   private sync() {
     const { tabs, panels } = this;
-    if (DEV && tabs.length !== panels.length) {
-      console.warn(`<ui-tabs> has ${tabs.length} tabs but ${panels.length} panel(s). They pair up by order.`, this);
+    if (tabs.length !== panels.length) {
+      warnOnce(this, `<ui-tabs> has ${tabs.length} tabs but ${panels.length} panel(s). They pair up by order.`);
     }
     const selected = this.selectedIndex >= 0 && this.selectedIndex < tabs.length ? this.selectedIndex : 0;
 
@@ -220,9 +219,7 @@ export class UiTabs extends LitElement {
   }
 
   protected firstUpdated() {
-    if (DEV && !this.label) {
-      console.warn('<ui-tabs> has no label, so its tab list has no accessible name.', this);
-    }
+    if (!this.label) warnOnce(this, '<ui-tabs> has no label, so its tab list has no accessible name.');
   }
 
   protected updated() {

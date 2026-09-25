@@ -97,15 +97,6 @@
               "privacy": "private"
             },
             {
-              "kind": "field",
-              "name": "warned",
-              "type": {
-                "text": "boolean"
-              },
-              "privacy": "private",
-              "default": "false"
-            },
-            {
               "kind": "method",
               "name": "warnIfNameless",
               "privacy": "private"
@@ -383,12 +374,31 @@
                 "text": "boolean | undefined"
               },
               "privacy": "private",
-              "description": "Captured once: `checked` reflects, so the attribute changes later."
+              "description": "Captured once, from the property: `checked` reflects, so the attribute\nchanges later, and React sets the property before the element connects,\nwhen there is no attribute yet."
             },
             {
               "kind": "method",
               "name": "formResetCallback",
               "description": "Called by the browser on `form.reset()`."
+            },
+            {
+              "kind": "method",
+              "name": "formStateRestoreCallback",
+              "parameters": [
+                {
+                  "name": "state",
+                  "type": {
+                    "text": "string | File | FormData | null"
+                  }
+                },
+                {
+                  "name": "_mode",
+                  "type": {
+                    "text": "'restore' | 'autocomplete'"
+                  }
+                }
+              ],
+              "description": "Called by the browser when it restores the form: back/forward navigation, autofill."
             },
             {
               "kind": "method",
@@ -688,6 +698,16 @@
               "privacy": "private"
             },
             {
+              "kind": "field",
+              "name": "pressedOnBackdrop",
+              "type": {
+                "text": "boolean"
+              },
+              "privacy": "private",
+              "default": "false",
+              "description": "Whether the current press began on the backdrop. See onClick."
+            },
+            {
               "kind": "method",
               "name": "requestClose",
               "privacy": "private",
@@ -856,6 +876,11 @@
             {
               "kind": "method",
               "name": "onToggle",
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "warnIfNameless",
               "privacy": "private"
             }
           ],
@@ -1490,6 +1515,25 @@
               "kind": "method",
               "name": "formResetCallback",
               "description": "Called by the browser on `form.reset()`."
+            },
+            {
+              "kind": "method",
+              "name": "formStateRestoreCallback",
+              "parameters": [
+                {
+                  "name": "state",
+                  "type": {
+                    "text": "string | File | FormData | null"
+                  }
+                },
+                {
+                  "name": "_mode",
+                  "type": {
+                    "text": "'restore' | 'autocomplete'"
+                  }
+                }
+              ],
+              "description": "Called by the browser when it restores the form: back/forward navigation, autofill."
             },
             {
               "kind": "method",

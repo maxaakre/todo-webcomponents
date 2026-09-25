@@ -153,7 +153,8 @@ Grows the app's existing tokens in `src/styles.css`.
 3. **Component:** one knob per need (`--ui-button-radius`), falling back to tier 2.
 
 - Components read only tiers 2 and 3.
-- Every `var()` in a component has a fallback, so components render without `tokens.css`.
+- Components read private copies (`--_color-accent`, …) defined once in `internal/styles.ts`, each with a light-theme fallback, so components render without `tokens.css`. A test checks the fallbacks match the tokens.
+- **Changed after review:** semantic colours use `light-dark()`, written once; `data-theme` sets `color-scheme`.
 
 ### Themes
 - Default follows `prefers-color-scheme`.

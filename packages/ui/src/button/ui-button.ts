@@ -2,9 +2,9 @@ import { css, html } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { customElement } from '../internal/define.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
-import { DEV } from '../internal/dev.js';
+import { base } from '../internal/styles.js';
 import { FormControl } from '../internal/form-control.js';
-import { slotText } from '../internal/slot-text.js';
+import { warnIfSlotEmpty } from '../internal/warn.js';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 export type ButtonSize = 'sm' | 'md';
@@ -27,44 +27,43 @@ export type ButtonSize = 'sm' | 'md';
  */
 @customElement('ui-button')
 export class UiButton extends FormControl {
-  static styles = css`
+  static styles = [base, css`
     :host { display: inline-block; }
-    :host([hidden]) { display: none; }
 
     button {
       --_bg: transparent;
-      --_fg: var(--ui-color-text, #16181d);
-      --_border: var(--ui-color-border-strong, #7c8491);
+      --_fg: var(--_color-text);
+      --_border: var(--_color-border-strong);
 
       display: inline-flex; align-items: center; justify-content: center;
-      gap: var(--ui-button-gap, var(--ui-space-1, 0.35rem));
+      gap: var(--ui-button-gap, var(--_space-1));
       /* Fill the host, so a consumer can size ui-button like any box. */
       inline-size: 100%; block-size: 100%;
       font: inherit; line-height: 1; cursor: pointer;
       color: var(--_fg); background: var(--_bg);
       border: 1px solid var(--_border);
-      border-radius: var(--ui-button-radius, var(--ui-radius-md, 10px));
+      border-radius: var(--ui-button-radius, var(--_radius-md));
       padding: 0.55rem 0.9rem;
-      transition: filter var(--ui-duration, 150ms);
+      transition: filter var(--_duration);
     }
     :host([size='sm']) button { padding: 0.25rem 0.5rem; font-size: 0.875em; }
 
     :host([variant='primary']) button {
-      --_bg: var(--ui-color-accent, #2563eb);
-      --_fg: var(--ui-color-on-accent, #fff);
+      --_bg: var(--_color-accent);
+      --_fg: var(--_color-on-accent);
       --_border: var(--_bg);
     }
     :host([variant='danger']) button {
-      --_bg: var(--ui-color-danger, #b91c1c);
-      --_fg: var(--ui-color-on-danger, #fff);
+      --_bg: var(--_color-danger);
+      --_fg: var(--_color-on-danger);
       --_border: var(--_bg);
     }
     :host([variant='ghost']) button { --_border: transparent; }
-    :host([variant='ghost']) button:hover { --_bg: var(--ui-color-surface, #f8fafc); }
+    :host([variant='ghost']) button:hover { --_bg: var(--_color-surface); }
 
     button:hover { filter: brightness(1.08); }
     button:focus-visible {
-      outline: 2px solid var(--ui-color-focus, #2563eb);
+      outline: var(--_focus-ring);
       outline-offset: 2px;
     }
     button:disabled { cursor: not-allowed; opacity: 0.55; filter: none; }
@@ -72,14 +71,13 @@ export class UiButton extends FormControl {
     /* Windows High Contrast: let system colours win, keep an edge on ghost. */
     @media (forced-colors: active) {
       button { border-color: ButtonText; }
-      button:focus-visible { outline-color: Highlight; }
       button:disabled { color: GrayText; border-color: GrayText; opacity: 1; }
     }
 
     @media (prefers-reduced-motion: reduce) {
       button { transition: none; }
     }
-  `;
+  `];
 
   /** Visual weight. Reflected, so `ui-button[variant="danger"]` works in CSS. */
   @property({ reflect: true }) variant: ButtonVariant = 'secondary';
@@ -106,14 +104,10 @@ export class UiButton extends FormControl {
     if (this.type === 'submit') this.form?.requestSubmit();
   }
 
-  private warned = false;
-
   private warnIfNameless() {
-    if (!DEV || this.label || this.warned) return;
-    if (!slotText(this.button.querySelector('slot:not([name])')!)) {
-      this.warned = true;
-      console.warn('<ui-button> has no accessible name. Add text or a `label`.', this);
-    }
+    if (this.label) return;
+    warnIfSlotEmpty(this, this.button.querySelector('slot:not([name])'),
+      '<ui-button> has no accessible name. Add text or a `label`.');
   }
 
   render() {

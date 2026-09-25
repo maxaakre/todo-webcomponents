@@ -1,8 +1,8 @@
 import { LitElement, css, html } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { customElement } from '../internal/define.js';
-import { DEV } from '../internal/dev.js';
-import { slotText } from '../internal/slot-text.js';
+import { base } from '../internal/styles.js';
+import { warnIfSlotEmpty } from '../internal/warn.js';
 
 export type UiToggleEvent = CustomEvent<{ open: boolean }>;
 
@@ -25,34 +25,30 @@ export type UiToggleEvent = CustomEvent<{ open: boolean }>;
  */
 @customElement('ui-disclosure')
 export class UiDisclosure extends LitElement {
-  static styles = css`
+  static styles = [base, css`
     :host { display: block; }
-    :host([hidden]) { display: none; }
 
     summary {
-      display: flex; align-items: center; gap: var(--ui-space-1, 0.35rem);
-      cursor: pointer; border-radius: var(--ui-radius-sm, 6px);
+      display: flex; align-items: center; gap: var(--_space-1);
+      cursor: pointer; border-radius: var(--_radius-sm);
       list-style: none; /* hide the native marker… */
     }
     summary::-webkit-details-marker { display: none; } /* …in Safari too */
-    summary:focus-visible { outline: 2px solid var(--ui-color-focus, #2563eb); outline-offset: 2px; }
+    summary:focus-visible { outline: var(--_focus-ring); outline-offset: 2px; }
 
     .chevron {
       flex: none; inline-size: 0.5em; block-size: 0.5em;
       border-inline-end: 2px solid currentColor; border-block-end: 2px solid currentColor;
-      transform: rotate(-45deg); transition: transform var(--ui-duration, 150ms);
+      transform: rotate(-45deg); transition: transform var(--_duration);
     }
     details[open] .chevron { transform: rotate(45deg); }
 
-    .content { padding-block-start: var(--ui-disclosure-gap, var(--ui-space-2, 0.75rem)); }
+    .content { padding-block-start: var(--ui-disclosure-gap, var(--_space-2)); }
 
     @media (prefers-reduced-motion: reduce) {
       .chevron { transition: none; }
     }
-    @media (forced-colors: active) {
-      summary:focus-visible { outline-color: Highlight; }
-    }
-  `;
+  `];
 
   /** Reflected, so `ui-disclosure[open]` works in CSS. Kept in sync with the native `<details>`. */
   @property({ type: Boolean, reflect: true }) open = false;
@@ -71,10 +67,13 @@ export class UiDisclosure extends LitElement {
     this.dispatchEvent(new CustomEvent('ui-toggle', { detail: { open: this.open }, bubbles: true }));
   }
 
+  private warnIfNameless() {
+    warnIfSlotEmpty(this, this.shadowRoot!.querySelector('slot[name="summary"]'),
+      '<ui-disclosure> has an empty summary, so its button has no name.');
+  }
+
   protected firstUpdated() {
-    if (DEV && !slotText(this.shadowRoot!.querySelector('slot[name="summary"]')!)) {
-      console.warn('<ui-disclosure> has an empty summary, so its button has no name.', this);
-    }
+    this.warnIfNameless();
   }
 
   render() {
@@ -82,7 +81,7 @@ export class UiDisclosure extends LitElement {
       <details .open=${this.open} @toggle=${this.onToggle}>
         <summary part="summary">
           <span class="chevron" aria-hidden="true"></span>
-          <slot name="summary"></slot>
+          <slot name="summary" @slotchange=${this.warnIfNameless}></slot>
         </summary>
         <div part="content" class="content"><slot></slot></div>
       </details>`;

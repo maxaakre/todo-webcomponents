@@ -2,9 +2,9 @@ import { css, html } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { customElement } from '../internal/define.js';
 import { live } from 'lit/directives/live.js';
-import { DEV } from '../internal/dev.js';
+import { base } from '../internal/styles.js';
 import { FormControl } from '../internal/form-control.js';
-import { slotText } from '../internal/slot-text.js';
+import { warnIfSlotEmpty } from '../internal/warn.js';
 
 /**
  * A checkbox with its label. Wraps a native `<input type="checkbox">`, so
@@ -25,30 +25,25 @@ import { slotText } from '../internal/slot-text.js';
  */
 @customElement('ui-checkbox')
 export class UiCheckbox extends FormControl {
-  static styles = css`
+  static styles = [base, css`
     :host { display: inline-block; }
-    :host([hidden]) { display: none; }
 
     /* flex, not inline-flex: the label fills the host, so the click
        target grows when a consumer stretches the checkbox. */
     label {
       display: flex; align-items: center;
-      gap: var(--ui-space-2, 0.75rem);
+      gap: var(--_space-2);
       cursor: pointer;
     }
     input {
       inline-size: var(--ui-checkbox-size, 1rem);
       block-size: var(--ui-checkbox-size, 1rem);
       margin: 0; flex: none; cursor: inherit;
-      accent-color: var(--ui-color-accent, #2563eb);
+      accent-color: var(--_color-accent);
     }
-    input:focus-visible { outline: 2px solid var(--ui-color-focus, #2563eb); outline-offset: 2px; }
+    input:focus-visible { outline: var(--_focus-ring); outline-offset: 2px; }
     :host([disabled]) label, label:has(input:disabled) { cursor: not-allowed; opacity: 0.55; }
-
-    @media (forced-colors: active) {
-      input:focus-visible { outline-color: Highlight; }
-    }
-  `;
+  `];
 
   /** Reflected, so `ui-checkbox[checked]` works in CSS. The initial attribute is restored on form reset. */
   @property({ type: Boolean, reflect: true }) checked = false;
@@ -102,9 +97,8 @@ export class UiCheckbox extends FormControl {
   }
 
   private warnIfNameless() {
-    if (DEV && !slotText(this.shadowRoot!.querySelector('slot')!)) {
-      console.warn('<ui-checkbox> has no label text, so it has no accessible name.', this);
-    }
+    warnIfSlotEmpty(this, this.shadowRoot!.querySelector('slot'),
+      '<ui-checkbox> has no label text, so it has no accessible name.');
   }
 
   protected firstUpdated() {
@@ -123,7 +117,7 @@ export class UiCheckbox extends FormControl {
                .indeterminate=${this.indeterminate}
                ?disabled=${this.isDisabled}
                @change=${this.onChange} />
-        <slot></slot>
+        <slot @slotchange=${this.warnIfNameless}></slot>
       </label>`;
   }
 }

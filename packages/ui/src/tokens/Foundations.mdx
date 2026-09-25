@@ -25,7 +25,7 @@ Every component also has fallbacks, so it still renders without this file.
 ## Themes
 
 - Default: follows `prefers-color-scheme`.
-- Force one: `data-theme="light"` or `data-theme="dark"` on any ancestor.
+- Force one: `data-theme="light"` or `data-theme="dark"` on any ancestor. It only sets `color-scheme`: each colour is written once, as `light-dark(light, dark)`, and the browser picks by the `color-scheme` of the element using it.
 - Custom: override tier 2 on a wrapper.
 
 ## Semantic colours

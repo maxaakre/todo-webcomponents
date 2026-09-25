@@ -1,7 +1,8 @@
 import { LitElement, css, html } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { customElement } from '../internal/define.js';
-import { DEV } from '../internal/dev.js';
+import { base } from '../internal/styles.js';
+import { warnOnce } from '../internal/warn.js';
 
 export type UiCloseEvent = CustomEvent<{ returnValue: string }>;
 
@@ -30,26 +31,26 @@ export type UiCloseEvent = CustomEvent<{ returnValue: string }>;
  */
 @customElement('ui-dialog')
 export class UiDialog extends LitElement {
-  static styles = css`
+  static styles = [base, css`
     dialog {
       box-sizing: border-box;
       inline-size: min(var(--ui-dialog-width, 28rem), calc(100vw - 2rem));
-      padding: 0; border: 1px solid var(--ui-color-border, #e5e7eb);
-      border-radius: var(--ui-radius-md, 10px);
-      color: var(--ui-color-text, #16181d); background: var(--ui-color-bg, #fff);
+      padding: 0; border: 1px solid var(--_color-border);
+      border-radius: var(--_radius-md);
+      color: var(--_color-text); background: var(--_color-bg);
       box-shadow: 0 10px 40px rgb(0 0 0 / 0.25);
     }
     dialog::backdrop { background: rgb(0 0 0 / 0.45); }
 
     /* Padding lives on the inner wrapper, so every click on the <dialog>
        element itself is a click on the backdrop. */
-    .panel { padding: var(--ui-space-3, 1.25rem); display: grid; gap: var(--ui-space-2, 0.75rem); }
+    .panel { padding: var(--_space-3); display: grid; gap: var(--_space-2); }
     h2 { margin: 0; font-size: 1.1rem; font-weight: 620; }
-    footer { display: flex; justify-content: flex-end; gap: var(--ui-space-1, 0.35rem); }
+    footer { display: flex; justify-content: flex-end; gap: var(--_space-1); }
     footer:not(:has(slot[name='footer'])) { display: none; }
 
     dialog[open] { opacity: 1; transform: none; }
-    dialog { transition: opacity var(--ui-duration, 150ms), transform var(--ui-duration, 150ms); }
+    dialog { transition: opacity var(--_duration), transform var(--_duration); }
     @starting-style {
       dialog[open] { opacity: 0; transform: translateY(8px); }
     }
@@ -60,7 +61,7 @@ export class UiDialog extends LitElement {
     @media (forced-colors: active) {
       dialog { border: 2px solid CanvasText; }
     }
-  `;
+  `];
 
   /** Reflected. `true` opens it as a modal; `false` closes it without an event. */
   @property({ type: Boolean, reflect: true }) open = false;
@@ -126,9 +127,7 @@ export class UiDialog extends LitElement {
     if (this.open && !this.dialog.open) {
       // Checked on open, not on first render: a reused dialog often gets
       // its label only when it is about to be shown.
-      if (DEV && !this.label) {
-        console.warn('<ui-dialog> opened with no label, so it has no accessible name.', this);
-      }
+      if (!this.label) warnOnce(this, '<ui-dialog> opened with no label, so it has no accessible name.');
       this.dialog.showModal();
     } else if (!this.open && this.dialog.open) {
       this.dialog.close();
