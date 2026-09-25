@@ -5,6 +5,11 @@ on:
     branches: [main]
   pull_request:
 
+# The job only reads the repo. Without this, the token gets the repo's
+# default permissions, which can include write access.
+permissions:
+  contents: read
+
 jobs:
   check:
     runs-on: ubuntu-latest

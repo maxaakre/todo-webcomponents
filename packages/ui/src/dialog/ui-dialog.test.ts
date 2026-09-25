@@ -157,6 +157,27 @@ describe('ui-dialog: user closes and ui-close', () => {
     expect(dialog.returnValue).toBe('erase');
   });
 
+  it('a data-dialog-close on an ancestor of the dialog is ignored', async () => {
+    // composedPath() runs past the dialog, up through the host's ancestors.
+    // Only closers inside the dialog count.
+    const root = await fixture<HTMLDivElement>(html`
+      <div data-dialog-close="outer">
+        <button id="trigger">Open</button>
+        <ui-dialog label="Nested"><p>Body text</p><button slot="footer">Plain</button></ui-dialog>
+      </div>`);
+    const dialog = root.querySelector('ui-dialog')!;
+    await openFrom(root.querySelector('#trigger')!, dialog);
+    const onClose = vi.fn();
+    dialog.addEventListener('ui-close', onClose);
+    await userEvent.click(dialog.querySelector('p')!);
+    await userEvent.click(dialog.querySelector('button')!);
+    await dialog.updateComplete;
+    expect(onClose).not.toHaveBeenCalled();
+    expect(dialog.open).toBe(true);
+    dialog.open = false;
+    await dialog.updateComplete;
+  });
+
   it('preventDefault on ui-close keeps it open', async () => {
     const { trigger, dialog, confirm } = parts(await make());
     await openFrom(trigger, dialog);

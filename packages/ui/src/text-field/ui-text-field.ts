@@ -1,5 +1,6 @@
 import { css, html, nothing } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
+import { customElement } from '../internal/define.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { live } from 'lit/directives/live.js';
 import { DEV } from '../internal/dev.js';

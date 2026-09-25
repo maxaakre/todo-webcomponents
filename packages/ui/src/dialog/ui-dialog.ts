@@ -1,5 +1,6 @@
 import { LitElement, css, html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
+import { customElement } from '../internal/define.js';
 import { DEV } from '../internal/dev.js';
 
 export type UiCloseEvent = CustomEvent<{ returnValue: string }>;
@@ -96,8 +97,12 @@ export class UiDialog extends LitElement {
       if (this.closeOnBackdrop) this.requestClose('');
       return;
     }
-    // Clicks from slotted content are retargeted; composedPath sees the real target.
-    const closer = e.composedPath().find(
+    // Clicks from slotted content are retargeted; composedPath sees the real
+    // target. Only look inside the dialog: the path goes on past it, up
+    // through the host's own ancestors, which must not close it.
+    const path = e.composedPath();
+    const inside = path.slice(0, path.indexOf(this.dialog));
+    const closer = inside.find(
       (n): n is Element => n instanceof Element && n.hasAttribute('data-dialog-close'),
     );
     if (closer) this.requestClose(closer.getAttribute('data-dialog-close') ?? '');

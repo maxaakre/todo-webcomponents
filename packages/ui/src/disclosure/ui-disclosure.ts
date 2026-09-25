@@ -1,5 +1,6 @@
 import { LitElement, css, html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
+import { customElement } from '../internal/define.js';
 import { DEV } from '../internal/dev.js';
 import { slotText } from '../internal/slot-text.js';
 

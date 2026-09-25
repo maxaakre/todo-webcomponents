@@ -1,5 +1,6 @@
 import { LitElement, css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
+import { customElement } from '../internal/define.js';
 import { DEV } from '../internal/dev.js';
 
 export type UiTabChangeEvent = CustomEvent<{ index: number; value: string }>;
