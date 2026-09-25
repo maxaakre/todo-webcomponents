@@ -6,7 +6,9 @@ settings:
 
 importers:
 
-  .:
+  .: {}
+
+  apps/daily-todo:
     dependencies:
       lit:
         specifier: ^3.3.3

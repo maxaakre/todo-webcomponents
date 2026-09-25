@@ -235,6 +235,7 @@ pause "Once you are on the configuration screen for this project, press Enter."
 # ── 3 ─────────────────────────────────────────────────────────────────────
 stage "Check the build settings before deploying"
 say "Vercel should detect this as a Vite project on its own. Verify, do not assume."
+step "Root directory should be:   apps/daily-todo"
 step "Framework preset should be: Vite"
 step "Build command should be:    pnpm build"
 step "Output directory should be: dist"

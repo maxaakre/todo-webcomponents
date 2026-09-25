@@ -38,10 +38,17 @@ Then open **http://localhost:5173/**.
 | Command | Does |
 |---|---|
 | `pnpm dev` | Dev server with hot reload |
-| `pnpm build` | Typecheck (`tsc`) then bundle (`vite build`) |
+| `pnpm build` | Typecheck (`tsc`) then bundle (`vite build`), for every workspace package |
 | `pnpm preview` | Serve the production build locally |
 | `pnpm test` | Run the test suite once |
 | `pnpm test:watch` | Run tests in watch mode |
+
+### Layout
+
+A pnpm workspace. Run every command from the repo root.
+
+- **`apps/daily-todo/`** — the app
+- **`packages/`** — the component library (in progress, see [the spec](./docs/superpowers/specs/2026-09-25-ui-library-design.md))
 
 ### Versions
 
@@ -170,7 +177,7 @@ Two throwaway branches hold primary sources. Neither is merged, by design — `m
 
 ## Tests
 
-`pnpm test` — **56 tests**, Vitest with happy-dom.
+`pnpm test` — **62 tests**, Vitest with happy-dom.
 
 They concentrate on the places that fail **silently**:
 
