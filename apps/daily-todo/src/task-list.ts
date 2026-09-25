@@ -22,6 +22,7 @@ export class TaskList extends LitElement {
     /* checked reflects, so the slotted title can be styled from here. */
     ui-checkbox[checked] { text-decoration: line-through; color: var(--ui-color-text-muted); }
     p { color: var(--ui-color-text-muted); margin: 0; padding: var(--ui-space-3) 0; }
+    p:focus { outline: none; } /* focused from code, as a landing spot only */
     ui-dialog p { color: inherit; padding: 0; }
   `;
 
@@ -45,7 +46,8 @@ export class TaskList extends LitElement {
     this.pending = null;
     if (!task || e.detail.returnValue !== 'erase') return;
 
-    this.focusIndexAfterErase = this.tasks.indexOf(task);
+    // By id: a reload while the dialog was open replaces the Task objects.
+    this.focusIndexAfterErase = this.tasks.findIndex((t) => t.id === task.id);
     this.dispatchEvent(new CustomEvent('task-erased', {
       detail: { id: task.id }, bubbles: true, composed: true,
     }));
@@ -53,14 +55,19 @@ export class TaskList extends LitElement {
 
   protected updated(changed: Map<string, unknown>) {
     if (!changed.has('tasks') || this.focusIndexAfterErase === null) return;
-    // The next row slides into the erased one's place; at the end, the one before.
+    // The next row slides into the erased one's place; at the end, the one
+    // before. With no rows left, the empty message: never <body>.
     const boxes = this.renderRoot.querySelectorAll('ui-checkbox');
-    boxes[Math.min(this.focusIndexAfterErase, boxes.length - 1)]?.focus();
+    const target = boxes.length
+      ? boxes[Math.min(Math.max(this.focusIndexAfterErase, 0), boxes.length - 1)]
+      : this.renderRoot.querySelector<HTMLElement>('p');
+    target?.focus();
     this.focusIndexAfterErase = null;
   }
 
   render() {
-    if (!this.tasks.length) return html`<p>${this.empty}</p>`;
+    // tabindex -1: focusable from code (after erasing the last Task), not by Tab.
+    if (!this.tasks.length) return html`<p tabindex="-1">${this.empty}</p>`;
     return html`<ul>${this.tasks.map((t) => html`
       <li>
         <ui-checkbox .checked=${t.status === 'done'}
