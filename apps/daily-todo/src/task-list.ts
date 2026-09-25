@@ -1,7 +1,9 @@
 import { LitElement, css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import '@maxaakre/ui/button';
 import '@maxaakre/ui/checkbox';
+import '@maxaakre/ui/dialog';
+import type { UiCloseEvent } from '@maxaakre/ui/dialog';
 import type { Task } from './model.js';
 
 /** One element, always interactive — no readonly mode. Used both inside
@@ -20,10 +22,17 @@ export class TaskList extends LitElement {
     /* checked reflects, so the slotted title can be styled from here. */
     ui-checkbox[checked] { text-decoration: line-through; color: var(--ui-color-text-muted); }
     p { color: var(--ui-color-text-muted); margin: 0; padding: var(--ui-space-3) 0; }
+    ui-dialog p { color: inherit; padding: 0; }
   `;
 
   @property({ attribute: false }) tasks: Task[] = [];
   @property() empty = 'Nothing planned yet.';
+
+  /** The Task whose × was pressed. Erase has no undo, so it asks first. */
+  @state() private pending: Task | null = null;
+
+  /** Row to focus once the erased Task has left the list. */
+  private focusIndexAfterErase: number | null = null;
 
   private toggle(id: string) {
     this.dispatchEvent(new CustomEvent('task-toggled', {
@@ -31,10 +40,23 @@ export class TaskList extends LitElement {
     }));
   }
 
-  private requestErase(id: string) {
+  private onConfirmClosed(e: UiCloseEvent) {
+    const task = this.pending;
+    this.pending = null;
+    if (!task || e.detail.returnValue !== 'erase') return;
+
+    this.focusIndexAfterErase = this.tasks.indexOf(task);
     this.dispatchEvent(new CustomEvent('task-erased', {
-      detail: { id }, bubbles: true, composed: true,
+      detail: { id: task.id }, bubbles: true, composed: true,
     }));
+  }
+
+  protected updated(changed: Map<string, unknown>) {
+    if (!changed.has('tasks') || this.focusIndexAfterErase === null) return;
+    // The next row slides into the erased one's place; at the end, the one before.
+    const boxes = this.renderRoot.querySelectorAll('ui-checkbox');
+    boxes[Math.min(this.focusIndexAfterErase, boxes.length - 1)]?.focus();
+    this.focusIndexAfterErase = null;
   }
 
   render() {
@@ -44,8 +66,14 @@ export class TaskList extends LitElement {
         <ui-checkbox .checked=${t.status === 'done'}
                      @change=${() => this.toggle(t.id)}>${t.title}</ui-checkbox>
         <ui-button variant="ghost" size="sm" label=${`Erase "${t.title}"`}
-                   @click=${() => this.requestErase(t.id)}>&#10005;</ui-button>
-      </li>`)}</ul>`;
+                   @click=${() => (this.pending = t)}>&#10005;</ui-button>
+      </li>`)}</ul>
+      <ui-dialog label=${this.pending ? `Erase “${this.pending.title}”?` : ''}
+                 .open=${this.pending !== null} @ui-close=${this.onConfirmClosed}>
+        <p>It leaves your list. This cannot be undone.</p>
+        <ui-button slot="footer" data-dialog-close="cancel">Cancel</ui-button>
+        <ui-button slot="footer" variant="danger" data-dialog-close="erase">Erase</ui-button>
+      </ui-dialog>`;
   }
 }
 

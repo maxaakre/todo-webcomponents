@@ -4,299 +4,6 @@
   "modules": [
     {
       "kind": "javascript-module",
-      "path": "src/button/ui-button.ts",
-      "declarations": [
-        {
-          "kind": "class",
-          "description": "A button. Wraps a native `<button>` so keyboard, focus and screen-reader\nbehaviour come from the platform.\n\nFires only the native `click`. No custom event: consumers already know\nhow to listen for a click, and every framework handles it.",
-          "name": "UiButton",
-          "cssProperties": [
-            {
-              "description": "Corner radius.",
-              "name": "--ui-button-radius",
-              "default": "var(--ui-radius-md)"
-            },
-            {
-              "description": "Space between slots.",
-              "name": "--ui-button-gap",
-              "default": "var(--ui-space-1)"
-            }
-          ],
-          "cssParts": [
-            {
-              "description": "The inner native `<button>`.",
-              "name": "button"
-            }
-          ],
-          "slots": [
-            {
-              "description": "The label.",
-              "name": ""
-            },
-            {
-              "description": "Content before the label, usually an icon.",
-              "name": "prefix"
-            },
-            {
-              "description": "Content after the label, usually an icon.",
-              "name": "suffix"
-            }
-          ],
-          "members": [
-            {
-              "kind": "field",
-              "name": "variant",
-              "type": {
-                "text": "ButtonVariant"
-              },
-              "default": "'secondary'",
-              "description": "Visual weight. Reflected, so `ui-button[variant=\"danger\"]` works in CSS.",
-              "attribute": "variant",
-              "reflects": true
-            },
-            {
-              "kind": "field",
-              "name": "size",
-              "type": {
-                "text": "ButtonSize"
-              },
-              "default": "'md'",
-              "attribute": "size",
-              "reflects": true
-            },
-            {
-              "kind": "field",
-              "name": "type",
-              "type": {
-                "text": "'button' | 'submit'"
-              },
-              "default": "'button'",
-              "description": "`button` by default, not `submit` like the native element: an accidental\nsubmit is worse than a button that needs one more attribute.",
-              "attribute": "type"
-            },
-            {
-              "kind": "field",
-              "name": "label",
-              "type": {
-                "text": "string | undefined"
-              },
-              "description": "Accessible name for icon-only buttons. Use this, not `aria-label` on the\nhost: the host has no role, so a label there names nothing.",
-              "attribute": "label"
-            },
-            {
-              "kind": "field",
-              "name": "button",
-              "type": {
-                "text": "HTMLButtonElement"
-              },
-              "privacy": "private"
-            },
-            {
-              "kind": "method",
-              "name": "onClick",
-              "privacy": "private"
-            },
-            {
-              "kind": "field",
-              "name": "warned",
-              "type": {
-                "text": "boolean"
-              },
-              "privacy": "private",
-              "default": "false"
-            },
-            {
-              "kind": "method",
-              "name": "warnIfNameless",
-              "privacy": "private"
-            },
-            {
-              "kind": "field",
-              "name": "formAssociated",
-              "type": {
-                "text": "boolean"
-              },
-              "static": true,
-              "default": "true",
-              "inheritedFrom": {
-                "name": "FormControl",
-                "module": "src/internal/form-control.ts"
-              }
-            },
-            {
-              "kind": "field",
-              "name": "shadowRootOptions",
-              "type": {
-                "text": "object"
-              },
-              "static": true,
-              "default": "{ ...LitElement.shadowRootOptions, delegatesFocus: true }",
-              "inheritedFrom": {
-                "name": "FormControl",
-                "module": "src/internal/form-control.ts"
-              }
-            },
-            {
-              "kind": "field",
-              "name": "disabled",
-              "type": {
-                "text": "boolean"
-              },
-              "default": "false",
-              "description": "Reflected, and that matters beyond styling: a form-associated element\nwith a `disabled` attribute is a disabled form control to the browser.\nIt leaves the tab order and ignores clicks, including `el.click()`.",
-              "attribute": "disabled",
-              "reflects": true,
-              "inheritedFrom": {
-                "name": "FormControl",
-                "module": "src/internal/form-control.ts"
-              }
-            },
-            {
-              "kind": "field",
-              "name": "formDisabled",
-              "type": {
-                "text": "boolean"
-              },
-              "privacy": "protected",
-              "default": "false",
-              "description": "Set by a disabled ancestor `<fieldset>`, through `formDisabledCallback`.",
-              "inheritedFrom": {
-                "name": "FormControl",
-                "module": "src/internal/form-control.ts"
-              }
-            },
-            {
-              "kind": "field",
-              "name": "internals",
-              "privacy": "protected",
-              "readonly": true,
-              "inheritedFrom": {
-                "name": "FormControl",
-                "module": "src/internal/form-control.ts"
-              }
-            },
-            {
-              "kind": "field",
-              "name": "form",
-              "type": {
-                "text": "HTMLFormElement | null"
-              },
-              "description": "The form this control belongs to, if any.",
-              "readonly": true,
-              "inheritedFrom": {
-                "name": "FormControl",
-                "module": "src/internal/form-control.ts"
-              }
-            },
-            {
-              "kind": "field",
-              "name": "isDisabled",
-              "type": {
-                "text": "boolean"
-              },
-              "privacy": "protected",
-              "readonly": true,
-              "inheritedFrom": {
-                "name": "FormControl",
-                "module": "src/internal/form-control.ts"
-              }
-            },
-            {
-              "kind": "method",
-              "name": "formDisabledCallback",
-              "parameters": [
-                {
-                  "name": "disabled",
-                  "type": {
-                    "text": "boolean"
-                  }
-                }
-              ],
-              "description": "Called by the browser when a `<fieldset>` around it is (un)disabled.",
-              "inheritedFrom": {
-                "name": "FormControl",
-                "module": "src/internal/form-control.ts"
-              }
-            }
-          ],
-          "attributes": [
-            {
-              "name": "variant",
-              "type": {
-                "text": "ButtonVariant"
-              },
-              "default": "'secondary'",
-              "description": "Visual weight. Reflected, so `ui-button[variant=\"danger\"]` works in CSS.",
-              "fieldName": "variant"
-            },
-            {
-              "name": "size",
-              "type": {
-                "text": "ButtonSize"
-              },
-              "default": "'md'",
-              "fieldName": "size"
-            },
-            {
-              "name": "type",
-              "type": {
-                "text": "'button' | 'submit'"
-              },
-              "default": "'button'",
-              "description": "`button` by default, not `submit` like the native element: an accidental\nsubmit is worse than a button that needs one more attribute.",
-              "fieldName": "type"
-            },
-            {
-              "name": "label",
-              "type": {
-                "text": "string | undefined"
-              },
-              "description": "Accessible name for icon-only buttons. Use this, not `aria-label` on the\nhost: the host has no role, so a label there names nothing.",
-              "fieldName": "label"
-            },
-            {
-              "name": "disabled",
-              "type": {
-                "text": "boolean"
-              },
-              "default": "false",
-              "description": "Reflected, and that matters beyond styling: a form-associated element\nwith a `disabled` attribute is a disabled form control to the browser.\nIt leaves the tab order and ignores clicks, including `el.click()`.",
-              "fieldName": "disabled",
-              "inheritedFrom": {
-                "name": "FormControl",
-                "module": "src/internal/form-control.ts"
-              }
-            }
-          ],
-          "superclass": {
-            "name": "FormControl",
-            "module": "/src/internal/form-control.js"
-          },
-          "tagName": "ui-button",
-          "customElement": true
-        }
-      ],
-      "exports": [
-        {
-          "kind": "js",
-          "name": "UiButton",
-          "declaration": {
-            "name": "UiButton",
-            "module": "src/button/ui-button.ts"
-          }
-        },
-        {
-          "kind": "custom-element-definition",
-          "name": "ui-button",
-          "declaration": {
-            "name": "UiButton",
-            "module": "src/button/ui-button.ts"
-          }
-        }
-      ]
-    },
-    {
-      "kind": "javascript-module",
       "path": "src/checkbox/ui-checkbox.ts",
       "declarations": [
         {
@@ -595,6 +302,498 @@
           "declaration": {
             "name": "UiCheckbox",
             "module": "src/checkbox/ui-checkbox.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/button/ui-button.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "A button. Wraps a native `<button>` so keyboard, focus and screen-reader\nbehaviour come from the platform.\n\nFires only the native `click`. No custom event: consumers already know\nhow to listen for a click, and every framework handles it.",
+          "name": "UiButton",
+          "cssProperties": [
+            {
+              "description": "Corner radius.",
+              "name": "--ui-button-radius",
+              "default": "var(--ui-radius-md)"
+            },
+            {
+              "description": "Space between slots.",
+              "name": "--ui-button-gap",
+              "default": "var(--ui-space-1)"
+            }
+          ],
+          "cssParts": [
+            {
+              "description": "The inner native `<button>`.",
+              "name": "button"
+            }
+          ],
+          "slots": [
+            {
+              "description": "The label.",
+              "name": ""
+            },
+            {
+              "description": "Content before the label, usually an icon.",
+              "name": "prefix"
+            },
+            {
+              "description": "Content after the label, usually an icon.",
+              "name": "suffix"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "variant",
+              "type": {
+                "text": "ButtonVariant"
+              },
+              "default": "'secondary'",
+              "description": "Visual weight. Reflected, so `ui-button[variant=\"danger\"]` works in CSS.",
+              "attribute": "variant",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "size",
+              "type": {
+                "text": "ButtonSize"
+              },
+              "default": "'md'",
+              "attribute": "size",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "type",
+              "type": {
+                "text": "'button' | 'submit'"
+              },
+              "default": "'button'",
+              "description": "`button` by default, not `submit` like the native element: an accidental\nsubmit is worse than a button that needs one more attribute.",
+              "attribute": "type"
+            },
+            {
+              "kind": "field",
+              "name": "label",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Accessible name for icon-only buttons. Use this, not `aria-label` on the\nhost: the host has no role, so a label there names nothing.",
+              "attribute": "label"
+            },
+            {
+              "kind": "field",
+              "name": "button",
+              "type": {
+                "text": "HTMLButtonElement"
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "onClick",
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "warned",
+              "type": {
+                "text": "boolean"
+              },
+              "privacy": "private",
+              "default": "false"
+            },
+            {
+              "kind": "method",
+              "name": "warnIfNameless",
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "formAssociated",
+              "type": {
+                "text": "boolean"
+              },
+              "static": true,
+              "default": "true",
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "shadowRootOptions",
+              "type": {
+                "text": "object"
+              },
+              "static": true,
+              "default": "{ ...LitElement.shadowRootOptions, delegatesFocus: true }",
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Reflected, and that matters beyond styling: a form-associated element\nwith a `disabled` attribute is a disabled form control to the browser.\nIt leaves the tab order and ignores clicks, including `el.click()`.",
+              "attribute": "disabled",
+              "reflects": true,
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "formDisabled",
+              "type": {
+                "text": "boolean"
+              },
+              "privacy": "protected",
+              "default": "false",
+              "description": "Set by a disabled ancestor `<fieldset>`, through `formDisabledCallback`.",
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "internals",
+              "privacy": "protected",
+              "readonly": true,
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "form",
+              "type": {
+                "text": "HTMLFormElement | null"
+              },
+              "description": "The form this control belongs to, if any.",
+              "readonly": true,
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "isDisabled",
+              "type": {
+                "text": "boolean"
+              },
+              "privacy": "protected",
+              "readonly": true,
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "formDisabledCallback",
+              "parameters": [
+                {
+                  "name": "disabled",
+                  "type": {
+                    "text": "boolean"
+                  }
+                }
+              ],
+              "description": "Called by the browser when a `<fieldset>` around it is (un)disabled.",
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            }
+          ],
+          "attributes": [
+            {
+              "name": "variant",
+              "type": {
+                "text": "ButtonVariant"
+              },
+              "default": "'secondary'",
+              "description": "Visual weight. Reflected, so `ui-button[variant=\"danger\"]` works in CSS.",
+              "fieldName": "variant"
+            },
+            {
+              "name": "size",
+              "type": {
+                "text": "ButtonSize"
+              },
+              "default": "'md'",
+              "fieldName": "size"
+            },
+            {
+              "name": "type",
+              "type": {
+                "text": "'button' | 'submit'"
+              },
+              "default": "'button'",
+              "description": "`button` by default, not `submit` like the native element: an accidental\nsubmit is worse than a button that needs one more attribute.",
+              "fieldName": "type"
+            },
+            {
+              "name": "label",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Accessible name for icon-only buttons. Use this, not `aria-label` on the\nhost: the host has no role, so a label there names nothing.",
+              "fieldName": "label"
+            },
+            {
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Reflected, and that matters beyond styling: a form-associated element\nwith a `disabled` attribute is a disabled form control to the browser.\nIt leaves the tab order and ignores clicks, including `el.click()`.",
+              "fieldName": "disabled",
+              "inheritedFrom": {
+                "name": "FormControl",
+                "module": "src/internal/form-control.ts"
+              }
+            }
+          ],
+          "superclass": {
+            "name": "FormControl",
+            "module": "/src/internal/form-control.js"
+          },
+          "tagName": "ui-button",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "UiButton",
+          "declaration": {
+            "name": "UiButton",
+            "module": "src/button/ui-button.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-button",
+          "declaration": {
+            "name": "UiButton",
+            "module": "src/button/ui-button.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/dialog/ui-dialog.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "A modal dialog. Built on native `<dialog>` and `showModal()`, so the focus\ntrap, the inert background, the top layer and Escape come from the\nplatform.\n\nButtons with `data-dialog-close=\"<value>\"` close it with that value.\n`<form method=\"dialog\">` does not work here: a slotted form's parent is\nthis host, not the `<dialog>` inside the shadow root.",
+          "name": "UiDialog",
+          "cssProperties": [
+            {
+              "description": "Maximum width.",
+              "name": "--ui-dialog-width",
+              "default": "28rem"
+            }
+          ],
+          "cssParts": [
+            {
+              "description": "The native `<dialog>`.",
+              "name": "dialog"
+            },
+            {
+              "description": "The heading made from `label`.",
+              "name": "title"
+            },
+            {
+              "description": "The footer row.",
+              "name": "footer"
+            }
+          ],
+          "slots": [
+            {
+              "description": "The dialog body.",
+              "name": ""
+            },
+            {
+              "description": "Actions, usually buttons with `data-dialog-close`.",
+              "name": "footer"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "open",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Reflected. `true` opens it as a modal; `false` closes it without an event.",
+              "attribute": "open",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "label",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "The title. Shown as a heading and used as the dialog's accessible name.",
+              "attribute": "label"
+            },
+            {
+              "kind": "field",
+              "name": "closeOnBackdrop",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Close when the user clicks the backdrop. Off by default: an easy mis-click to lose work on.",
+              "attribute": "close-on-backdrop"
+            },
+            {
+              "kind": "field",
+              "name": "returnValue",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "The value of the last user close, like `HTMLDialogElement.returnValue`."
+            },
+            {
+              "kind": "field",
+              "name": "dialog",
+              "type": {
+                "text": "HTMLDialogElement"
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "requestClose",
+              "privacy": "private",
+              "parameters": [
+                {
+                  "name": "returnValue",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "A user-initiated close. Asks first, through a cancelable ui-close."
+            },
+            {
+              "kind": "method",
+              "name": "onCancel",
+              "privacy": "private",
+              "parameters": [
+                {
+                  "name": "e",
+                  "type": {
+                    "text": "Event"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "onClick",
+              "privacy": "private",
+              "parameters": [
+                {
+                  "name": "e",
+                  "type": {
+                    "text": "MouseEvent"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "onClose",
+              "privacy": "private"
+            }
+          ],
+          "events": [
+            {
+              "type": {
+                "text": "UiCloseEvent"
+              },
+              "description": "The user is closing it: Escape, the backdrop (with `close-on-backdrop`), or a `data-dialog-close` button. `detail.returnValue` is the button's value, or `''`. Cancelable: `preventDefault()` keeps it open. Not fired when `open` is set in code.",
+              "name": "ui-close"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "open",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Reflected. `true` opens it as a modal; `false` closes it without an event.",
+              "fieldName": "open"
+            },
+            {
+              "name": "label",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "The title. Shown as a heading and used as the dialog's accessible name.",
+              "fieldName": "label"
+            },
+            {
+              "name": "close-on-backdrop",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Close when the user clicks the backdrop. Off by default: an easy mis-click to lose work on.",
+              "fieldName": "closeOnBackdrop"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "ui-dialog",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "UiDialog",
+          "declaration": {
+            "name": "UiDialog",
+            "module": "src/dialog/ui-dialog.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-dialog",
+          "declaration": {
+            "name": "UiDialog",
+            "module": "src/dialog/ui-dialog.ts"
           }
         }
       ]

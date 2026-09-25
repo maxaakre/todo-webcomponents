@@ -76,7 +76,7 @@ Defined properly in [`CONTEXT.md`](./CONTEXT.md). In short:
 
 Tasks moved into today land at the **bottom** of the plan — what you chose deliberately keeps its place.
 
-A Task can also be **deleted outright** from the list with the ✕ button. Like Drop, this is a **hard delete with no undo** — nothing is archived and nothing can be recovered.
+A Task can also be **erased** from the list with the ✕ button. It **asks first**, in a dialog, because there is **no undo**: the Task never shows again. (Since ticket 13 of the sync map, the row stays in storage with `status: 'erased'`, but nothing in the UI brings it back.) After an erase, focus moves to the next Task.
 
 ### Storage
 

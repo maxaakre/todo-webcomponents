@@ -2,6 +2,7 @@
 // (e.g. '@maxaakre/ui/button') so apps load only what they use.
 export * from './button/ui-button.js';
 export * from './checkbox/ui-checkbox.js';
+export * from './dialog/ui-dialog.js';
 export * from './disclosure/ui-disclosure.js';
 export * from './tabs/ui-tabs.js';
 export * from './text-field/ui-text-field.js';

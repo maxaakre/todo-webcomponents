@@ -85,20 +85,71 @@ describe('<daily-todo-app>', () => {
     expect(list.shadowRoot!.querySelector('ui-checkbox')!.checked).toBe(true);
   });
 
-  it('× ERASES a Task — the row survives, but it leaves the list', async () => {
-    localStorage.setItem(KEY, JSON.stringify({ version: 2, tasks: [
-      { id: 'a', title: 'Typo task', status: 'open', day: currentDay(), order: 0, updatedAt: '2026-01-01T00:00:00.000Z' },
-      { id: 'b', title: 'Keep me', status: 'open', day: currentDay(), order: 1, updatedAt: '2026-01-01T00:00:00.000Z' },
-    ]}));
-    const app = await mount();
+  const twoTasks = () => localStorage.setItem(KEY, JSON.stringify({ version: 2, tasks: [
+    { id: 'a', title: 'Typo task', status: 'open', day: currentDay(), order: 0, updatedAt: '2026-01-01T00:00:00.000Z' },
+    { id: 'b', title: 'Keep me', status: 'open', day: currentDay(), order: 1, updatedAt: '2026-01-01T00:00:00.000Z' },
+  ]}));
+
+  /** Click × on the first row and wait for the confirm dialog. */
+  const askToErase = async (app: DailyTodoApp) => {
     const list = app.shadowRoot!.querySelector('task-list') as TaskList;
     await list.updateComplete;
     await userEvent.click(list.shadowRoot!.querySelectorAll('ui-button')[0]);
+    const dialog = list.shadowRoot!.querySelector('ui-dialog')!;
+    await dialog.updateComplete;
+    return { list, dialog };
+  };
+
+  it('× asks first: the dialog names the Task, and nothing is erased yet', async () => {
+    twoTasks();
+    const app = await mount();
+    const { dialog } = await askToErase(app);
+    expect(dialog.open).toBe(true);
+    expect(dialog.label).toBe('Erase “Typo task”?');
+    expect(stored().tasks.every((t: { status: string }) => t.status === 'open')).toBe(true);
+  });
+
+  it('confirming ERASES the Task: the row survives, but it leaves the list', async () => {
+    twoTasks();
+    const app = await mount();
+    const { list, dialog } = await askToErase(app);
+    await userEvent.click(dialog.querySelector('[data-dialog-close=erase]')!);
     await settle(app);
+    await list.updateComplete;
     const rows = stored().tasks as { id: string; status: string }[];
     expect(rows.map((t) => t.id)).toEqual(['a', 'b']);
     expect(rows.find((t) => t.id === 'a')!.status).toBe('erased');
     expect(list.shadowRoot!.querySelectorAll('li')).toHaveLength(1);
+    expect(dialog.open).toBe(false);
+  });
+
+  it('after an erase, focus moves to the next Task, not lost on <body>', async () => {
+    // The × that opened the dialog is gone with its row, so the browser's
+    // own focus return has nowhere to go. The list must pick a target.
+    twoTasks();
+    const app = await mount();
+    const { list, dialog } = await askToErase(app);
+    await userEvent.click(dialog.querySelector('[data-dialog-close=erase]')!);
+    await settle(app);
+    await list.updateComplete;
+    const next = list.shadowRoot!.querySelector('ui-checkbox')!;
+    expect(next.textContent).toContain('Keep me');
+    expect(list.shadowRoot!.activeElement).toBe(next);
+  });
+
+  it('Cancel and Escape erase nothing, and focus returns to ×', async () => {
+    twoTasks();
+    const app = await mount();
+    let { list, dialog } = await askToErase(app);
+    await userEvent.click(dialog.querySelector('[data-dialog-close=cancel]')!);
+    await dialog.updateComplete;
+    expect(dialog.open).toBe(false);
+    ({ list, dialog } = await askToErase(app));
+    await userEvent.keyboard('{Escape}');
+    await dialog.updateComplete;
+    await settle(app);
+    expect(stored().tasks.every((t: { status: string }) => t.status === 'open')).toBe(true);
+    expect(list.shadowRoot!.activeElement).toBe(list.shadowRoot!.querySelectorAll('ui-button')[0]);
   });
 
   it('the erase button is labelled for screen readers', async () => {
