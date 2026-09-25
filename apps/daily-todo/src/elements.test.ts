@@ -139,16 +139,22 @@ describe('<daily-todo-app>', () => {
 
   it('focus still finds the next Task if the list reloaded while the dialog was open', async () => {
     // A reload (another tab wrote) hands the list new Task objects, so the
-    // erased row must be found by id, not by object identity.
-    twoTasks();
+    // erased row must be found by id, not by object identity. The middle
+    // row is erased: a failed lookup (-1) would land on the first row.
+    localStorage.setItem(KEY, JSON.stringify({ version: 2, tasks: ['a', 'b', 'c'].map((id, order) => (
+      { id, title: `Task ${id}`, status: 'open', day: currentDay(), order, updatedAt: '2026-01-01T00:00:00.000Z' })) }));
     const app = await mount();
-    const { list, dialog } = await askToErase(app);
+    const list = app.shadowRoot!.querySelector('task-list') as TaskList;
+    await list.updateComplete;
+    await userEvent.click(list.shadowRoot!.querySelectorAll('ui-button')[1]);
+    const dialog = list.shadowRoot!.querySelector('ui-dialog')!;
+    await dialog.updateComplete;
     list.tasks = list.tasks.map((t) => ({ ...t }));
     await list.updateComplete;
     await userEvent.click(dialog.querySelector('[data-dialog-close=erase]')!);
     await settle(app);
     await list.updateComplete;
-    expect(list.shadowRoot!.activeElement).toBe(list.shadowRoot!.querySelector('ui-checkbox'));
+    expect((list.shadowRoot!.activeElement as HTMLElement).textContent).toContain('Task c');
   });
 
   it('erasing the last Task moves focus to the empty message, not <body>', async () => {
