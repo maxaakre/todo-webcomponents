@@ -39,3 +39,11 @@ It walks the Vercel import, checks the build settings, verifies the deployed URL
 **2026-09-25, agent session.** The app moved to **`apps/daily-todo/`** — the repo is now a pnpm workspace so a component library can live beside it (see `docs/superpowers/specs/2026-09-25-ui-library-design.md`). In Vercel, set **Root Directory = `apps/daily-todo`**; framework, build command and output directory are unchanged. The wizard's settings step now says so. Vercel detects pnpm workspaces and installs from the repo root.
 
 **2026-09-25, later.** Superseding the Root Directory note above: a **`vercel.json` now sits at the repo root** (`buildCommand: pnpm --filter daily-todo build`, `outputDirectory: apps/daily-todo/dist`), so **no Vercel project setting is needed** — leave Root Directory empty. The earlier "no vercel.json" call was right for a single-package repo; the workspace makes the config necessary rather than drift. The wizard's settings step matches.
+
+**2026-09-25, deployed.** Production URL: **https://daily-todo-phi.vercel.app** (Vercel project `maxaakres-projects/daily-todo`, linked from the repo root; `vercel.json` sets the build).
+
+Verified: the URL is public (HTTP 200 without a Vercel login), serves the current build, and on an emulated iPhone 13 a Task can be added, persisted to `localStorage`, and rescheduled to Tomorrow with no console errors.
+
+Still open before this ticket can be resolved:
+- **Pushes to `main` do not redeploy yet.** `vercel git connect` failed: the Vercel GitHub app has no access to `maxaakre/todo-webcomponents`. Install it (github.com/apps/vercel → Configure → this repo), then run `npx vercel git connect`.
+- **Open the URL on the real phone**, and add it to the home screen. Emulation is not the phone.
