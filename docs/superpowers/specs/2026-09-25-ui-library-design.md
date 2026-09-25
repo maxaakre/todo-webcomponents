@@ -221,7 +221,8 @@ A component is done when it has:
 4. tests: library in browser, app on happy-dom
 5. build library, apps and Storybook
 6. check `custom-elements.json` is up to date
-7. `npm publish --dry-run`
+7. build Storybook, then a smoke test: every story loads and every `ui-*` element in it is defined
+8. `npm publish --dry-run`
 
 ## 9. Build order
 

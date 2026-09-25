@@ -35,5 +35,10 @@ jobs:
 
       - run: pnpm --filter @maxaakre/ui build-storybook --quiet
 
+      # Unit tests do not tree-shake. This opens every built story and
+      # checks each ui-* element is defined, so a bad sideEffects entry
+      # cannot silently delete a component from production bundles.
+      - run: pnpm --filter @maxaakre/ui smoke-storybook
+
       - name: Package is publishable
         run: pnpm --filter @maxaakre/ui publish --dry-run --no-git-checks

@@ -1,5 +1,251 @@
 {
   "schemaVersion": "1.0.0",
   "readme": "",
-  "modules": []
+  "modules": [
+    {
+      "kind": "javascript-module",
+      "path": "src/button/ui-button.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "A button. Wraps a native `<button>` so keyboard, focus and screen-reader\nbehaviour come from the platform.\n\nFires only the native `click`. No custom event: consumers already know\nhow to listen for a click, and every framework handles it.",
+          "name": "UiButton",
+          "cssProperties": [
+            {
+              "description": "Corner radius.",
+              "name": "--ui-button-radius",
+              "default": "var(--ui-radius-md)"
+            },
+            {
+              "description": "Space between slots.",
+              "name": "--ui-button-gap",
+              "default": "var(--ui-space-1)"
+            }
+          ],
+          "cssParts": [
+            {
+              "description": "The inner native `<button>`.",
+              "name": "button"
+            }
+          ],
+          "slots": [
+            {
+              "description": "The label.",
+              "name": ""
+            },
+            {
+              "description": "Content before the label, usually an icon.",
+              "name": "prefix"
+            },
+            {
+              "description": "Content after the label, usually an icon.",
+              "name": "suffix"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "formAssociated",
+              "type": {
+                "text": "boolean"
+              },
+              "static": true,
+              "default": "true",
+              "description": "Form-associated, so `type=\"submit\"` can reach a form outside the shadow root."
+            },
+            {
+              "kind": "field",
+              "name": "shadowRootOptions",
+              "type": {
+                "text": "object"
+              },
+              "static": true,
+              "default": "{ ...LitElement.shadowRootOptions, delegatesFocus: true }"
+            },
+            {
+              "kind": "field",
+              "name": "variant",
+              "type": {
+                "text": "ButtonVariant"
+              },
+              "default": "'secondary'",
+              "description": "Visual weight. Reflected, so `ui-button[variant=\"danger\"]` works in CSS.",
+              "attribute": "variant",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "size",
+              "type": {
+                "text": "ButtonSize"
+              },
+              "default": "'md'",
+              "attribute": "size",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Reflected, and that matters beyond styling: a form-associated element\nwith a `disabled` attribute is a disabled form control to the browser.\nIt leaves the tab order and ignores clicks, including `el.click()`.",
+              "attribute": "disabled",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "type",
+              "type": {
+                "text": "'button' | 'submit'"
+              },
+              "default": "'button'",
+              "description": "`button` by default, not `submit` like the native element: an accidental\nsubmit is worse than a button that needs one more attribute.",
+              "attribute": "type"
+            },
+            {
+              "kind": "field",
+              "name": "label",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Accessible name for icon-only buttons. Use this, not `aria-label` on the\nhost: the host has no role, so a label there names nothing.",
+              "attribute": "label"
+            },
+            {
+              "kind": "field",
+              "name": "formDisabled",
+              "type": {
+                "text": "boolean"
+              },
+              "privacy": "private",
+              "default": "false",
+              "description": "Set by a disabled ancestor `<fieldset>`, through the form-associated callback."
+            },
+            {
+              "kind": "field",
+              "name": "button",
+              "type": {
+                "text": "HTMLButtonElement"
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "internals",
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "formDisabledCallback",
+              "parameters": [
+                {
+                  "name": "disabled",
+                  "type": {
+                    "text": "boolean"
+                  }
+                }
+              ],
+              "description": "Called by the browser when a `<fieldset>` around it is (un)disabled."
+            },
+            {
+              "kind": "field",
+              "name": "isDisabled",
+              "privacy": "private",
+              "readonly": true
+            },
+            {
+              "kind": "method",
+              "name": "onClick",
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "warned",
+              "type": {
+                "text": "boolean"
+              },
+              "privacy": "private",
+              "default": "false"
+            },
+            {
+              "kind": "method",
+              "name": "warnIfNameless",
+              "privacy": "private"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "variant",
+              "type": {
+                "text": "ButtonVariant"
+              },
+              "default": "'secondary'",
+              "description": "Visual weight. Reflected, so `ui-button[variant=\"danger\"]` works in CSS.",
+              "fieldName": "variant"
+            },
+            {
+              "name": "size",
+              "type": {
+                "text": "ButtonSize"
+              },
+              "default": "'md'",
+              "fieldName": "size"
+            },
+            {
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Reflected, and that matters beyond styling: a form-associated element\nwith a `disabled` attribute is a disabled form control to the browser.\nIt leaves the tab order and ignores clicks, including `el.click()`.",
+              "fieldName": "disabled"
+            },
+            {
+              "name": "type",
+              "type": {
+                "text": "'button' | 'submit'"
+              },
+              "default": "'button'",
+              "description": "`button` by default, not `submit` like the native element: an accidental\nsubmit is worse than a button that needs one more attribute.",
+              "fieldName": "type"
+            },
+            {
+              "name": "label",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Accessible name for icon-only buttons. Use this, not `aria-label` on the\nhost: the host has no role, so a label there names nothing.",
+              "fieldName": "label"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "ui-button",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "UiButton",
+          "declaration": {
+            "name": "UiButton",
+            "module": "src/button/ui-button.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-button",
+          "declaration": {
+            "name": "UiButton",
+            "module": "src/button/ui-button.ts"
+          }
+        }
+      ]
+    }
+  ]
 }

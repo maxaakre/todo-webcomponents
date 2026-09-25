@@ -6,12 +6,17 @@
   "type": "module",
   "sideEffects": [
     "./dist/**/ui-*.js",
+    "./src/**/ui-*.ts",
     "*.css"
   ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./button": {
+      "types": "./dist/button/ui-button.d.ts",
+      "default": "./dist/button/ui-button.js"
     },
     "./tokens.css": "./dist/tokens/tokens.css"
   },
@@ -24,11 +29,12 @@
     "build": "tsc -p tsconfig.build.json && node scripts/copy-css.js && pnpm manifest",
     "manifest": "cem analyze --litelement --globs 'src/**/ui-*.ts' --exclude 'src/**/*.test.ts' --exclude 'src/**/*.stories.ts'",
     "typecheck": "tsc --noEmit",
-    "lint": "lit-analyzer 'src/**/ui-*.ts' --strict",
+    "lint": "node scripts/lint.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build -o storybook-static"
+    "build-storybook": "storybook build -o storybook-static",
+    "smoke-storybook": "node scripts/smoke-storybook.js"
   },
   "peerDependencies": {
     "lit": "^3.3.0"
