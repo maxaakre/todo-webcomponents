@@ -234,15 +234,14 @@ pause "Once you are on the configuration screen for this project, press Enter."
 
 # ── 3 ─────────────────────────────────────────────────────────────────────
 stage "Check the build settings before deploying"
-say "Vercel should detect this as a Vite project on its own. Verify, do not assume."
-step "Root directory should be:   apps/daily-todo"
-step "Framework preset should be: Vite"
-step "Build command should be:    pnpm build"
-step "Output directory should be: dist"
+say "The repo is a pnpm workspace. vercel.json at the root sets the build, so accept what it shows."
+step "Root directory: leave empty (the repo root)."
+step "Build command: set by vercel.json to   pnpm --filter daily-todo build"
+step "Output directory: set by vercel.json to apps/daily-todo/dist"
+step "Framework preset: Vite or Other both work; vercel.json overrides the build either way."
 step "Install command can stay on the default (it respects the pinned pnpm version)."
 note "Exact labels move around in Vercel's UI; match the meaning, not the wording."
 note "Leave Environment Variables empty. This app reads none, by design."
-warn "If it guessed a different framework, override it rather than accepting it."
 pause "Settings look right?"
 
 # ── 4 ─────────────────────────────────────────────────────────────────────

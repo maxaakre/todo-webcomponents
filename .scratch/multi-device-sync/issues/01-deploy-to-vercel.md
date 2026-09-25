@@ -37,3 +37,5 @@ Also done: `.claude/worktrees/` added to `.gitignore` (agent worktrees were show
 It walks the Vercel import, checks the build settings, verifies the deployed URL responds, helps get it onto the phone, and appends the production URL below.
 
 **2026-09-25, agent session.** The app moved to **`apps/daily-todo/`** — the repo is now a pnpm workspace so a component library can live beside it (see `docs/superpowers/specs/2026-09-25-ui-library-design.md`). In Vercel, set **Root Directory = `apps/daily-todo`**; framework, build command and output directory are unchanged. The wizard's settings step now says so. Vercel detects pnpm workspaces and installs from the repo root.
+
+**2026-09-25, later.** Superseding the Root Directory note above: a **`vercel.json` now sits at the repo root** (`buildCommand: pnpm --filter daily-todo build`, `outputDirectory: apps/daily-todo/dist`), so **no Vercel project setting is needed** — leave Root Directory empty. The earlier "no vercel.json" call was right for a single-package repo; the workspace makes the config necessary rather than drift. The wizard's settings step matches.
