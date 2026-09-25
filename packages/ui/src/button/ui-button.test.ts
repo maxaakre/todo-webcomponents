@@ -1,9 +1,10 @@
 import { html } from 'lit';
-import { describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { userEvent } from 'vitest/browser';
 import { fixture } from '../test/fixture.js';
 import { expectNoA11yViolations } from '../test/a11y.js';
 import { contrastRatio } from '../test/contrast.js';
+import tokens from '../tokens/tokens.css?inline';
 import './ui-button.js';
 import type { UiButton } from './ui-button.js';
 
@@ -165,5 +166,79 @@ describe('ui-button: axe', () => {
   it('icon-only with a label has no violations', async () => {
     const el = await fixture<UiButton>(html`<ui-button label="Close"><svg aria-hidden="true"></svg></ui-button>`);
     await expectNoA11yViolations(el);
+  });
+});
+
+describe('ui-button: hover', () => {
+  // What the eye can see: fill or border colour, by a margin a person can
+  // notice. A filter on a transparent background, or #f8fafc on white
+  // (1.04:1), does not count.
+  const page = '#ffffff'; // the test page behind transparent buttons
+  // No transition: otherwise a colour read right after hovering is taken
+  // part-way through the 150ms fade, and the result depends on timing.
+  const still = '--ui-duration: 0s';
+  const opaque = (c: string) => (c === 'rgba(0, 0, 0, 0)' ? page : c);
+  const look = (el: UiButton) => {
+    const { backgroundColor, borderColor } = getComputedStyle(inner(el));
+    return { bg: opaque(backgroundColor), border: opaque(borderColor) };
+  };
+  const visiblyChanged = (a: ReturnType<typeof look>, b: ReturnType<typeof look>) =>
+    contrastRatio(a.bg, b.bg) >= 1.1 || contrastRatio(a.border, b.border) >= 1.5;
+
+  it.each(['primary', 'secondary', 'ghost', 'danger'] as const)('%s visibly changes on hover', async (variant) => {
+    const el = await fixture<UiButton>(html`<ui-button variant=${variant} style=${still}>Save</ui-button>`);
+    // The pointer may still rest where the last test's button was, which is
+    // exactly where this one renders. Move it off first, or "before" is
+    // already the hover state.
+    await userEvent.unhover(el);
+    const before = look(el);
+    await userEvent.hover(el);
+    expect(visiblyChanged(before, look(el))).toBe(true);
+  });
+
+  it.each(['primary', 'secondary', 'ghost', 'danger'] as const)('%s keeps 4.5:1 text contrast while hovered', async (variant) => {
+    const el = await fixture<UiButton>(html`<ui-button variant=${variant} style=${still}>Save</ui-button>`);
+    await userEvent.hover(el);
+    const style = getComputedStyle(inner(el));
+    const bg = style.backgroundColor === 'rgba(0, 0, 0, 0)' ? '#ffffff' : style.backgroundColor;
+    expect(contrastRatio(style.color, bg)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('a disabled button does not react to hover', async () => {
+    const el = await fixture<UiButton>(html`<ui-button disabled style=${still}>Save</ui-button>`);
+    await userEvent.unhover(el, { force: true });
+    const before = look(el);
+    await userEvent.hover(el, { force: true });
+    expect(look(el)).toEqual(before);
+  });
+
+  describe('in the dark theme, with tokens.css', () => {
+    let sheet: HTMLStyleElement;
+    beforeAll(() => {
+      sheet = document.createElement('style');
+      sheet.textContent = tokens;
+      document.head.append(sheet);
+    });
+    afterAll(() => sheet.remove());
+
+    it.each(['primary', 'secondary', 'ghost', 'danger'] as const)('%s visibly changes, and keeps 4.5:1', async (variant) => {
+      const box = await fixture<HTMLDivElement>(html`
+        <div data-theme="dark" style="background: var(--ui-color-bg); padding: 8px">
+          <ui-button variant=${variant} style=${still}>Save</ui-button>
+        </div>`);
+      const el = box.querySelector('ui-button')!;
+      const pageBg = getComputedStyle(box).backgroundColor;
+      const read = () => {
+        const { color, backgroundColor, borderColor } = getComputedStyle(inner(el));
+        const bg = backgroundColor === 'rgba(0, 0, 0, 0)' ? pageBg : backgroundColor;
+        return { color, bg, border: borderColor === 'rgba(0, 0, 0, 0)' ? bg : borderColor };
+      };
+      await userEvent.unhover(el);
+      const before = read();
+      await userEvent.hover(el);
+      const after = read();
+      expect(contrastRatio(before.bg, after.bg, box) >= 1.1 || contrastRatio(before.border, after.border, box) >= 1.5).toBe(true);
+      expect(contrastRatio(after.color, after.bg, box)).toBeGreaterThanOrEqual(4.5);
+    });
   });
 });

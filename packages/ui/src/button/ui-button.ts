@@ -44,7 +44,7 @@ export class UiButton extends FormControl {
       border: 1px solid var(--_border);
       border-radius: var(--ui-button-radius, var(--_radius-md));
       padding: 0.55rem 0.9rem;
-      transition: filter var(--_duration);
+      transition: background-color var(--_duration), border-color var(--_duration);
     }
     :host([size='sm']) button { padding: 0.25rem 0.5rem; font-size: 0.875em; }
 
@@ -59,14 +59,30 @@ export class UiButton extends FormControl {
       --_border: var(--_bg);
     }
     :host([variant='ghost']) button { --_border: transparent; }
-    :host([variant='ghost']) button:hover { --_bg: var(--_color-surface); }
 
-    button:hover { filter: brightness(1.08); }
+    /* Hover changes what the eye can see: the fill, and for outlined
+       buttons the border. Filled variants mix toward the text colour, which
+       is darker in light mode and lighter in dark mode, so it reads in both
+       themes and keeps the label's contrast. Only on devices that hover,
+       so a tap on a phone does not leave it stuck. */
+    @media (hover: hover) {
+      /* Outlined and ghost: a tint of the text colour over the page. */
+      button:hover:not(:disabled) {
+        --_bg: color-mix(in srgb, var(--_color-text) 8%, var(--_color-bg));
+      }
+      :host([variant='secondary']) button:hover:not(:disabled) { --_border: var(--_color-text); }
+      :host([variant='primary']) button:hover:not(:disabled) {
+        --_bg: color-mix(in srgb, var(--_color-accent) 80%, var(--_color-text));
+      }
+      :host([variant='danger']) button:hover:not(:disabled) {
+        --_bg: color-mix(in srgb, var(--_color-danger) 80%, var(--_color-text));
+      }
+    }
     button:focus-visible {
       outline: var(--_focus-ring);
       outline-offset: 2px;
     }
-    button:disabled { cursor: not-allowed; opacity: 0.55; filter: none; }
+    button:disabled { cursor: not-allowed; opacity: 0.55; }
 
     /* Windows High Contrast: let system colours win, keep an edge on ghost. */
     @media (forced-colors: active) {

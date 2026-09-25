@@ -16,7 +16,7 @@ The app is also a **learning vehicle for Lit and web components**, so idiomatic 
 |---|---|
 | The app | ✅ built, matches the design ([9 of 9 decisions](.scratch/daily-todo/map.md)) |
 | Component library | ✅ `@maxaakre/ui`: 6 components, Storybook, tokens ([spec](./docs/superpowers/specs/2026-09-25-ui-library-design.md)) |
-| Tests | ✅ **235 passing**: 76 app, 149 library, 10 React demo. CI runs them on every push |
+| Tests | ✅ **250 passing**: 76 app, 164 library, 10 React demo. CI runs them on every push |
 | Multi-device sync | 🧭 planning: [5 of 13 tickets resolved](.scratch/multi-device-sync/map.md) |
 | Deployment | ⏳ ready (`vercel.json`); waits on connecting a Vercel account |
 

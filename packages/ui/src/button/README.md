@@ -17,6 +17,8 @@ A button. It wraps a native `<button>`, so keyboard, focus and screen-reader beh
 - **Default `type` is `button`, not `submit`.** The native default causes accidental submits. One extra attribute is cheaper than that bug.
 - **Form-associated.** The inner `<button>` sits in the shadow root, so it cannot see a form outside. The host can, through `ElementInternals`, and calls `form.requestSubmit()`. A bonus: the browser treats the host as a real form control. A `disabled` attribute, or a disabled `<fieldset>` around it, removes it from the tab order and blocks clicks. No hand-written guard needed.
 - **`label`, not `aria-label` on the host.** The host has no role, so an `aria-label` there names nothing. `label` goes onto the inner `<button>`.
+- **A hover you can see, in every variant.** Outlined and ghost get a tint of the text colour, and outlined also a darker border. Primary and danger mix 20% toward the text colour: darker in light mode, lighter in dark mode. That direction always *raises* the label's contrast. Tests require a visible change (at least 1.1:1 in fill or 1.5:1 in border) and 4.5:1 text while hovered, in both themes. The first version used `filter: brightness()`, which does nothing you can see on a transparent button.
+- **No hover on touch screens** (`@media (hover: hover)`), so a tap does not leave a button looking hovered. **No hover when disabled.**
 - **No custom event.** Native `click` is enough, and every framework already handles it.
 - **Dev warning** when a button has no text and no `label`. An icon-only button without a name is one of the most common a11y bugs.
 
