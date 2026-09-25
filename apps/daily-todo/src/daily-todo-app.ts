@@ -4,9 +4,11 @@ import '@maxaakre/ui/button';
 import './task-composer.js';
 import './task-list.js';
 import './triage-view.js';
+import './tomorrow-list.js';
+import { addDays } from './day.js';
 import { DayController } from './day-controller.js';
 import { makeClock } from './day.js';
-import { addTask, eraseTask, leftovers, tasksForDay, toggleTask, triageTask } from './store.js';
+import { addTask, eraseTask, leftovers, moveTask, tasksForDay, toggleTask, triageTask } from './store.js';
 import * as storage from './storage.js';
 import { emptyState } from './model.js';
 import type { State, Verdict } from './model.js';
@@ -96,6 +98,7 @@ export class DailyTodoApp extends LitElement {
     const today = this.day.today;
     const stale = leftovers(this.data, today);
     const todays = tasksForDay(this.data, today);
+    const tomorrows = tasksForDay(this.data, addDays(today, 1));
 
     return html`
       <header>
@@ -111,12 +114,14 @@ export class DailyTodoApp extends LitElement {
         ? html`<triage-view
               .leftovers=${stale} .todays=${todays} .today=${today}
               @task-triaged=${this.onTriaged} @task-toggled=${this.onToggled}
-              @task-erased=${this.onErased}
+              @task-erased=${this.onErased} @task-moved=${this.onMoved}
             ></triage-view>`
         : html`<task-list
               .tasks=${todays} @task-toggled=${this.onToggled}
-              @task-erased=${this.onErased}
-            ></task-list>`}`;
+              @task-erased=${this.onErased} @task-moved=${this.onMoved}
+            ></task-list>`}
+
+      <tomorrow-list .tasks=${tomorrows} @task-moved=${this.onMoved}></tomorrow-list>`;
   }
 
   private onAdded = (e: CustomEvent<{ title: string }>) =>
@@ -127,6 +132,9 @@ export class DailyTodoApp extends LitElement {
 
   private onErased = (e: CustomEvent<{ id: string }>) =>
     this.apply((s) => eraseTask(s, e.detail.id, makeClock()));
+
+  private onMoved = (e: CustomEvent<{ id: string; to: 'today' | 'tomorrow' }>) =>
+    this.apply((s) => moveTask(s, e.detail.id, e.detail.to, makeClock()));
 
   private onTriaged = (e: CustomEvent<{ id: string; verdict: Verdict }>) =>
     this.apply((s) => triageTask(s, e.detail.id, e.detail.verdict, makeClock()));

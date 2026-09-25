@@ -76,9 +76,15 @@ export function toggleTask(state: State, id: string, clock: Clock): State {
   };
 }
 
-export function triageTask(state: State, id: string, verdict: Verdict, clock: Clock): State {
-  if (verdict === 'drop') return abandonTask(state, id, clock);
-  const day = verdict === 'today' ? clock.today : addDays(clock.today, 1);
+/**
+ * Move an open Task to today, or reschedule it to tomorrow. It lands at the
+ * bottom of that Day: what was planned there deliberately keeps its place.
+ * Only open Tasks move; anything finished with returns the SAME state.
+ */
+export function moveTask(state: State, id: string, to: 'today' | 'tomorrow', clock: Clock): State {
+  const target = state.tasks.find((t) => t.id === id);
+  if (!target || target.status !== 'open') return state;
+  const day = to === 'today' ? clock.today : addDays(clock.today, 1);
   const order = nextOrder(state, day);
   return {
     ...state,
@@ -86,4 +92,9 @@ export function triageTask(state: State, id: string, verdict: Verdict, clock: Cl
       t.id === id ? { ...t, day, order, updatedAt: clock.now } : t,
     ),
   };
+}
+
+export function triageTask(state: State, id: string, verdict: Verdict, clock: Clock): State {
+  if (verdict === 'drop') return abandonTask(state, id, clock);
+  return moveTask(state, id, verdict, clock);
 }

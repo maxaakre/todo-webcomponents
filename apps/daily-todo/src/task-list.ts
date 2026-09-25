@@ -1,4 +1,4 @@
-import { LitElement, css, html } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import '@maxaakre/ui/button';
 import '@maxaakre/ui/checkbox';
@@ -32,8 +32,8 @@ export class TaskList extends LitElement {
   /** The Task whose × was pressed. Erase has no undo, so it asks first. */
   @state() private pending: Task | null = null;
 
-  /** Row to focus once the erased Task has left the list. */
-  private focusIndexAfterErase: number | null = null;
+  /** Row to focus once an erased or rescheduled Task has left the list. */
+  private focusIndexAfterRemoval: number | null = null;
 
   private toggle(id: string) {
     this.dispatchEvent(new CustomEvent('task-toggled', {
@@ -46,23 +46,35 @@ export class TaskList extends LitElement {
     this.pending = null;
     if (!task || e.detail.returnValue !== 'erase') return;
 
-    // By id: a reload while the dialog was open replaces the Task objects.
-    this.focusIndexAfterErase = this.tasks.findIndex((t) => t.id === task.id);
+    this.removing(task.id);
     this.dispatchEvent(new CustomEvent('task-erased', {
       detail: { id: task.id }, bubbles: true, composed: true,
     }));
   }
 
+  private reschedule(id: string) {
+    this.removing(id);
+    this.dispatchEvent(new CustomEvent('task-moved', {
+      detail: { id, to: 'tomorrow' }, bubbles: true, composed: true,
+    }));
+  }
+
+  /** Remember where the row was, so focus has somewhere to go once it is gone. */
+  private removing(id: string) {
+    // By id: a reload while the dialog was open replaces the Task objects.
+    this.focusIndexAfterRemoval = this.tasks.findIndex((t) => t.id === id);
+  }
+
   protected updated(changed: Map<string, unknown>) {
-    if (!changed.has('tasks') || this.focusIndexAfterErase === null) return;
+    if (!changed.has('tasks') || this.focusIndexAfterRemoval === null) return;
     // The next row slides into the erased one's place; at the end, the one
     // before. With no rows left, the empty message: never <body>.
     const boxes = this.renderRoot.querySelectorAll('ui-checkbox');
     const target = boxes.length
-      ? boxes[Math.min(Math.max(this.focusIndexAfterErase, 0), boxes.length - 1)]
+      ? boxes[Math.min(Math.max(this.focusIndexAfterRemoval, 0), boxes.length - 1)]
       : this.renderRoot.querySelector<HTMLElement>('p');
     target?.focus();
-    this.focusIndexAfterErase = null;
+    this.focusIndexAfterRemoval = null;
   }
 
   render() {
@@ -72,6 +84,9 @@ export class TaskList extends LitElement {
       <li>
         <ui-checkbox .checked=${t.status === 'done'}
                      @change=${() => this.toggle(t.id)}>${t.title}</ui-checkbox>
+        ${t.status === 'open' ? html`
+          <ui-button variant="ghost" size="sm" label=${`Move "${t.title}" to tomorrow`}
+                     @click=${() => this.reschedule(t.id)}>Tomorrow</ui-button>` : nothing}
         <ui-button variant="ghost" size="sm" label=${`Erase "${t.title}"`}
                    @click=${() => (this.pending = t)}>&#10005;</ui-button>
       </li>`)}</ul>

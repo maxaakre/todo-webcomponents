@@ -22,6 +22,10 @@ What becomes of a Task that was not done when its Day ended. Rollover is never a
 
 The step the user is shown when opening the app on a new Day while unfinished Tasks remain on an earlier Day. For each such Task the user chooses: **move** it to Today, **drop** it, or **reschedule** it to a later Day.
 
+## Reschedule
+
+Move an open Task to **tomorrow** — never further. Offered in Triage, and on any open Task in Today. A rescheduled Task stays visible in the **Tomorrow** section until its Day comes, and can be moved back to Today from there.
+
 ## Drop
 
 The Triage verdict meaning "I am not going to do this." A dropped Task is **abandoned, not erased** — deciding against something is an outcome, the same as finishing it.

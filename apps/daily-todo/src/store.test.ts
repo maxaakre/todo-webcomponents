@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { abandonTask, addTask, eraseTask, leftovers, tasksForDay, toggleTask, triageTask } from './store.js';
+import { abandonTask, addTask, eraseTask, leftovers, moveTask, tasksForDay, toggleTask, triageTask } from './store.js';
 import { emptyState } from './model.js';
 import type { State, Task } from './model.js';
 
@@ -166,6 +166,48 @@ describe('eraseTask', () => {
     const next = addTask(eraseTask(state, 'b', clock), 'new one', clock);
     expect(next.tasks.at(-1)!.order).toBe(3);
     expect(tasksForDay(next, clock.today).map((t) => t.id)).toEqual(['a', 'c', next.tasks.at(-1)!.id]);
+  });
+});
+
+describe('moveTask', () => {
+  const tomorrow = '2026-09-18';
+
+  it('reschedules an open Task to tomorrow, at the bottom, and stamps updatedAt', () => {
+    const state = stateWith([
+      task({ id: 'a', day: clock.today, order: 0 }),
+      task({ id: 'b', day: tomorrow, order: 0 }),
+    ]);
+    const next = moveTask(state, 'a', 'tomorrow', clock);
+    const moved = next.tasks.find((t) => t.id === 'a')!;
+    expect(moved.day).toBe(tomorrow);
+    expect(moved.order).toBe(1);
+    expect(moved.updatedAt).toBe(clock.now);
+    expect(tasksForDay(next, clock.today)).toEqual([]);
+  });
+
+  it('moves it back to today, at the bottom of the plan', () => {
+    const state = stateWith([
+      task({ id: 'a', day: clock.today, order: 0 }),
+      task({ id: 'b', day: tomorrow, order: 0 }),
+    ]);
+    const next = moveTask(state, 'b', 'today', clock);
+    expect(tasksForDay(next, clock.today).map((t) => t.id)).toEqual(['a', 'b']);
+  });
+
+  it('REFUSES to move a Task that is not open, returning the SAME state', () => {
+    // Done, abandoned and erased are all finished with; moving one would
+    // put it back in front of the user on another Day.
+    for (const status of ['done', 'abandoned', 'erased'] as const) {
+      const state = stateWith([task({ id: 'a', day: clock.today, status })]);
+      expect(moveTask(state, 'a', 'tomorrow', clock)).toBe(state);
+    }
+  });
+
+  it('does not mutate the input state', () => {
+    const state = stateWith([task({ id: 'a', day: clock.today })]);
+    const before = JSON.stringify(state);
+    moveTask(state, 'a', 'tomorrow', clock);
+    expect(JSON.stringify(state)).toBe(before);
   });
 });
 

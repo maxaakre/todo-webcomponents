@@ -9,6 +9,8 @@ import type { DailyTodoApp } from './daily-todo-app.js';
 import type { TaskComposer } from './task-composer.js';
 import type { TaskList } from './task-list.js';
 import type { TriageView } from './triage-view.js';
+import type { TomorrowList } from './tomorrow-list.js';
+import { addDays } from './day.js';
 import type { Task } from './model.js';
 
 const KEY = 'daily-todo/v1';
@@ -105,7 +107,7 @@ describe('<daily-todo-app>', () => {
   /** Click × on the first row and wait for the confirm dialog. */
   const askToErase = async (app: DailyTodoApp) => {
     const list = await child<TaskList>(app, 'task-list');
-    await userEvent.click(list.shadowRoot!.querySelectorAll('ui-button')[0]);
+    await userEvent.click(list.shadowRoot!.querySelectorAll('ui-button[label^=Erase]')[0]);
     const dialog = list.shadowRoot!.querySelector('ui-dialog')!;
     await dialog.updateComplete;
     return { list, dialog };
@@ -158,7 +160,7 @@ describe('<daily-todo-app>', () => {
     seed(task('a'), task('b', { order: 1 }), task('c', { order: 2 }));
     const app = await mount();
     const list = await child<TaskList>(app, 'task-list');
-    await userEvent.click(list.shadowRoot!.querySelectorAll('ui-button')[1]);
+    await userEvent.click(list.shadowRoot!.querySelectorAll('ui-button[label^=Erase]')[1]);
     const dialog = list.shadowRoot!.querySelector('ui-dialog')!;
     await dialog.updateComplete;
     list.tasks = list.tasks.map((t) => ({ ...t }));
@@ -189,16 +191,71 @@ describe('<daily-todo-app>', () => {
     await dialog.updateComplete;
     await settle(app);
     expect(stored().tasks.every((t: { status: string }) => t.status === 'open')).toBe(true);
-    expect(list.shadowRoot!.activeElement).toBe(list.shadowRoot!.querySelectorAll('ui-button')[0]);
+    expect(list.shadowRoot!.activeElement).toBe(list.shadowRoot!.querySelectorAll('ui-button[label^=Erase]')[0]);
   });
 
   it('the erase button is labelled for screen readers', async () => {
     seed(task('a', { title: 'Buy oat milk' }));
     const app = await mount();
     const list = await child<TaskList>(app, 'task-list');
-    const erase = list.shadowRoot!.querySelector('ui-button') as UiButton;
+    const erase = list.shadowRoot!.querySelector('ui-button[label^=Erase]') as UiButton;
     await erase.updateComplete;
     expect(erase.shadowRoot!.querySelector('button')!.getAttribute('aria-label')).toBe('Erase "Buy oat milk"');
+  });
+
+  describe('reschedule to tomorrow', () => {
+    const tomorrow = () => addDays(currentDay(), 1);
+    const tomorrowButton = (list: TaskList, i = 0) =>
+      list.shadowRoot!.querySelectorAll<UiButton>('ui-button[label$="to tomorrow"]')[i];
+
+    it('an open Task has a Tomorrow button; a done one does not', async () => {
+      seed(task('a', { title: 'Open one' }), task('b', { title: 'Done one', status: 'done', order: 1 }));
+      const app = await mount();
+      const list = await child<TaskList>(app, 'task-list');
+      const buttons = list.shadowRoot!.querySelectorAll<UiButton>('ui-button[label$="to tomorrow"]');
+      expect([...buttons].map((b) => b.label)).toEqual(['Move "Open one" to tomorrow']);
+    });
+
+    it('moves the Task to tomorrow: it leaves today and shows in the Tomorrow section', async () => {
+      seed(task('a', { title: 'Call the dentist' }), task('b', { title: 'Stays', order: 1 }));
+      const app = await mount();
+      const list = await child<TaskList>(app, 'task-list');
+      await userEvent.click(tomorrowButton(list));
+      await settle(app);
+      expect(stored().tasks.find((t: Task) => t.id === 'a').day).toBe(tomorrow());
+      await list.updateComplete;
+      expect(list.shadowRoot!.querySelectorAll('li')).toHaveLength(1);
+      const later = await child<TomorrowList>(app, 'tomorrow-list');
+      expect(later.shadowRoot!.querySelector('[slot=summary]')!.textContent).toContain('Tomorrow (1)');
+      expect(later.shadowRoot!.textContent).toContain('Call the dentist');
+    });
+
+    it('after a reschedule, focus moves to the next Task, not <body>', async () => {
+      seed(task('a', { title: 'First' }), task('b', { title: 'Second', order: 1 }));
+      const app = await mount();
+      const list = await child<TaskList>(app, 'task-list');
+      await userEvent.click(tomorrowButton(list));
+      await settle(app);
+      await list.updateComplete;
+      expect((list.shadowRoot!.activeElement as HTMLElement).textContent).toContain('Second');
+    });
+
+    it('the Tomorrow section starts collapsed, and ← Today moves a Task back to the bottom of today', async () => {
+      seed(task('a', { title: 'Today task' }), task('t', { title: 'Later task', day: addDays(currentDay(), 1) }));
+      const app = await mount();
+      const later = await child<TomorrowList>(app, 'tomorrow-list');
+      const section = later.shadowRoot!.querySelector('ui-disclosure')!;
+      expect(section.open).toBe(false);
+      await userEvent.click(section.querySelector('[slot=summary]')!);
+      await new Promise((r) => setTimeout(r, 0));
+      await userEvent.click(later.shadowRoot!.querySelector('ui-button[label$="to today"]')!);
+      await settle(app);
+      const list = await child<TaskList>(app, 'task-list');
+      expect([...list.shadowRoot!.querySelectorAll('ui-checkbox')].map((c) => c.textContent)).toEqual(['Today task', 'Later task']);
+      // The row, and the button that had focus, are gone: focus lands on the message.
+      await later.updateComplete;
+      expect(later.shadowRoot!.activeElement).toBe(later.shadowRoot!.querySelector('p'));
+    });
   });
 
   it('triages a leftover to today, landing it at the bottom of the plan', async () => {

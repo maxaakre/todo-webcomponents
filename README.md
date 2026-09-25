@@ -16,7 +16,7 @@ The app is also a **learning vehicle for Lit and web components**, so idiomatic 
 |---|---|
 | The app | ✅ built, matches the design ([9 of 9 decisions](.scratch/daily-todo/map.md)) |
 | Component library | ✅ `@maxaakre/ui`: 6 components, Storybook, tokens ([spec](./docs/superpowers/specs/2026-09-25-ui-library-design.md)) |
-| Tests | ✅ **227 passing**: 68 app, 149 library, 10 React demo. CI runs them on every push |
+| Tests | ✅ **235 passing**: 76 app, 149 library, 10 React demo. CI runs them on every push |
 | Multi-device sync | 🧭 planning: [5 of 13 tickets resolved](.scratch/multi-device-sync/map.md) |
 | Deployment | ⏳ ready (`vercel.json`); waits on connecting a Vercel account |
 
@@ -109,6 +109,8 @@ stateDiagram-v2
 
 Tasks moved into today land at the **bottom** of the plan — what you chose deliberately keeps its place.
 
+Any open Task in Today can also be **rescheduled to tomorrow**. It then waits in a collapsed **Tomorrow** section under the list, so it is never out of sight, and **← Today** brings it back. Tomorrow only, never further: that keeps every Task visible somewhere.
+
 A Task can also be **erased** from the list with the ✕ button. It **asks first**, in a dialog, because there is **no undo**: the Task never shows again. (Since ticket 13 of the sync map, the row stays in storage with `status: 'erased'`, but nothing in the UI brings it back.) After an erase, focus moves to the next Task.
 
 ### Storage
@@ -156,10 +158,12 @@ flowchart TD
   triage["<b>&lt;triage-view&gt;</b> two panes<br/>ui-disclosure · ui-button"]
   listT["<b>&lt;task-list&gt;</b><br/>right pane"]
   list["<b>&lt;task-list&gt;</b> single column<br/>ui-checkbox · ui-button · ui-dialog"]
+  later["<b>&lt;tomorrow-list&gt;</b><br/>ui-disclosure · ui-button"]
 
   app --> composer
   app -- "while something is left over" --> triage
   app -- "otherwise" --> list
+  app --> later
   triage --> listT
 ```
 
@@ -171,6 +175,8 @@ Each child sends one kind of event up to the root:
 | `<triage-view>` | `task-triaged { id, verdict }` | → Today, Tomorrow or Drop |
 | `<task-list>` | `task-toggled { id }` | The checkbox |
 | `<task-list>` | `task-erased { id }` | ✕, then **Erase** in the confirm dialog |
+| `<task-list>` | `task-moved { id, to: 'tomorrow' }` | **Tomorrow** on an open Task |
+| `<tomorrow-list>` | `task-moved { id, to: 'today' }` | **← Today** |
 
 **Props down, events up.** No `@lit/context`, no signals. Child elements never mutate state — they dispatch a verdict and the root applies it:
 
@@ -247,7 +253,7 @@ Throwaway branches hold primary sources. None is merged, by design: `main` keeps
 
 ## Tests
 
-`pnpm test` runs every package. The app has **68 tests**, in two Vitest projects: pure logic on happy-dom, and `elements.test.ts` in real Chromium. The split exists because happy-dom has no `ElementInternals`, and the app's form controls come from `@maxaakre/ui`, which is form-associated. The library has its own suite (`packages/ui`).
+`pnpm test` runs every package. The app has **76 tests**, in two Vitest projects: pure logic on happy-dom, and `elements.test.ts` in real Chromium. The split exists because happy-dom has no `ElementInternals`, and the app's form controls come from `@maxaakre/ui`, which is form-associated. The library has its own suite (`packages/ui`).
 
 They concentrate on the places that fail **silently**:
 
