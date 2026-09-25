@@ -2,6 +2,8 @@
 
 A small, deep Lit component library: accessible, typed, themeable. Works in any framework, including React 19.
 
+**Storybook:** https://maxaakre-ui.vercel.app — every component, its Guide (decisions, keyboard, screen-reader log), and the ADRs.
+
 ```bash
 npm install @maxaakre/ui lit
 ```

@@ -15,7 +15,7 @@ The app is also a **learning vehicle for Lit and web components**, so idiomatic 
 | | |
 |---|---|
 | The app | ✅ built, matches the design ([9 of 9 decisions](.scratch/daily-todo/map.md)) |
-| Component library | ✅ `@maxaakre/ui`: 6 components, Storybook, tokens ([spec](./docs/superpowers/specs/2026-09-25-ui-library-design.md)) |
+| Component library | ✅ `@maxaakre/ui`: 6 components, tokens. **Storybook live at https://maxaakre-ui.vercel.app** ([spec](./docs/superpowers/specs/2026-09-25-ui-library-design.md)) |
 | Tests | ✅ **250 passing**: 76 app, 164 library, 10 React demo. CI runs them on every push |
 | Multi-device sync | 🧭 planning: [5 of 13 tickets resolved](.scratch/multi-device-sync/map.md) |
 | Deployment | ✅ live at **https://daily-todo-phi.vercel.app**. Auto-deploy on push waits on the Vercel GitHub app ([ticket 01](.scratch/multi-device-sync/issues/01-deploy-to-vercel.md)) |
@@ -48,6 +48,7 @@ Then open **http://localhost:5173/**.
 | `pnpm test:watch` | The app's tests, in watch mode |
 | `pnpm typecheck` · `pnpm lint` | What CI runs before the tests |
 | `pnpm changeset` | Record a change to `@maxaakre/ui` for the next release |
+| `pnpm deploy:storybook` | Build Storybook, deploy it to https://maxaakre-ui.vercel.app, and smoke-test the live site |
 
 ### Layout
 

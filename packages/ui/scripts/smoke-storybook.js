@@ -6,11 +6,14 @@ import { join } from 'node:path';
 import { chromium } from 'playwright';
 import { serve } from './static-server.js';
 
+// SMOKE_URL checks a deployed Storybook instead of the local build.
 const root = 'storybook-static';
-const server = await serve(root);
-const base = server.url;
+const server = process.env.SMOKE_URL ? null : await serve(root);
+const base = process.env.SMOKE_URL ?? server.url;
 
-const { entries } = JSON.parse(readFileSync(join(root, 'index.json'), 'utf8'));
+const { entries } = process.env.SMOKE_URL
+  ? await (await fetch(`${base}/index.json`)).json()
+  : JSON.parse(readFileSync(join(root, 'index.json'), 'utf8'));
 const stories = Object.values(entries).filter((e) => e.type === 'story');
 
 const browser = await chromium.launch();
@@ -25,7 +28,7 @@ for (const { id } of stories) {
   if (undefinedTags.length) failures.push(`${id}: ${undefinedTags.join(', ')} not defined`);
 }
 await browser.close();
-server.close();
+server?.close();
 
 if (failures.length) {
   console.error(`Undefined elements in ${failures.length} stories:\n  ${failures.join('\n  ')}`);

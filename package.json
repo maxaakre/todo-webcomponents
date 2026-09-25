@@ -11,7 +11,8 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "lint": "pnpm -r --if-present lint",
     "storybook": "pnpm --filter @maxaakre/ui storybook",
-    "changeset": "changeset"
+    "changeset": "changeset",
+    "deploy:storybook": "pnpm --filter @maxaakre/ui build-storybook --quiet && npx -y vercel@latest deploy packages/ui/storybook-static --project maxaakre-ui --prod --yes && SMOKE_URL=https://maxaakre-ui.vercel.app pnpm --filter @maxaakre/ui smoke-storybook"
   },
   "packageManager": "pnpm@10.33.0+sha512.10568bb4a6afb58c9eb3630da90cc9516417abebd3fabbe6739f0ae795728da1491e9db5a544c76ad8eb7570f5c4bb3d6c637b2cb41bfdcdb47fa823c8649319",
   "pnpm": {
