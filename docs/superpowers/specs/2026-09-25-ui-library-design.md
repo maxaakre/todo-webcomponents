@@ -1,7 +1,7 @@
 # Design: `@maxaakre/ui` — a small, deep Lit component library
 
 Date: 2026-09-25
-Status: draft, awaiting review
+Status: built (steps 1–8 done, 2026-09-25). Changes made during the build are marked in the text.
 
 ## 1. Purpose
 

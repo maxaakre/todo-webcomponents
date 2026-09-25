@@ -1,0 +1,22 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Decisions/0004 Form-associated custom elements" />
+
+# 0004 · Form controls are form-associated custom elements
+
+**Status:** accepted
+
+## Context
+
+An `<input>` or `<button>` inside a shadow root cannot see a `<form>` outside it. It does not submit, is not in `FormData`, is not reset, and is not disabled by a `<fieldset>`.
+
+## Decision
+
+`ui-button`, `ui-text-field` and `ui-checkbox` extend a shared `FormControl` base: `static formAssociated = true` and `attachInternals()`. The host takes part in the form; the native control inside does the interaction.
+
+## Consequences
+
+- `FormData`, `form.reset()`, `form.checkValidity()`, `:invalid` and disabled `<fieldset>`s all work, with no framework wiring. The React demo reads a text field with a plain `FormData`.
+- Some native behaviour must be restored by hand: Enter submits (`requestSubmit()`), reset restores the initial value.
+- **happy-dom has no `ElementInternals`.** The app's element tests moved to a real browser.
+- A disabled form-associated host is a disabled form control to the browser, which blocks clicks and removes it from the tab order for free.

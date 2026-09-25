@@ -1,0 +1,31 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Decisions/0005 Apps consume TypeScript source in the monorepo" />
+
+# 0005 · Apps in the monorepo consume the library's source
+
+**Status:** accepted
+
+## Context
+
+`apps/daily-todo` and `apps/react-demo` depend on `@maxaakre/ui` through the pnpm workspace. By default they would resolve `dist/`, so every library change needs a build before the apps see it.
+
+## Decision
+
+Every export in `package.json` has a custom condition first:
+
+```json
+"./button": {
+  "@maxaakre/source": "./src/button/ui-button.ts",
+  "types": "./dist/button/ui-button.d.ts",
+  "default": "./dist/button/ui-button.js"
+}
+```
+
+The apps turn that condition on in Vite (`resolve.conditions`) and TypeScript (`customConditions`). Published consumers never set it, so they get `dist/`.
+
+## Consequences
+
+- No library build during development. Editing a component hot-reloads in both apps.
+- The published `package.json` still names `src/` paths that are not in the tarball. Harmless, because nothing outside the repo sets the condition. It could be stripped at publish time.
+- `sideEffects` must cover `src/` as well as `dist/`. It did not at first, and Storybook's build tree-shook a component away. A smoke test now fails if that happens.

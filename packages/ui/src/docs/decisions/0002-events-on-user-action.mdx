@@ -1,0 +1,23 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Decisions/0002 Events on user action only" />
+
+# 0002 · Events fire on user action, never when code sets a property
+
+**Status:** accepted
+
+## Context
+
+A framework that renders from state sets properties all the time. If setting `open` or `value` fired an event, the framework's handler would set state, re-render, set the property, fire again… a loop, or at best wasted work.
+
+## Decision
+
+- `ui-toggle`, `ui-tab-change`, `ui-close`, and the re-dispatched `change`, fire **only for the user**.
+- Where a native event fits (`click`, `input`, `change`), use it instead of inventing one.
+- Custom events are named `ui-<verb>`, typed in `HTMLElementEventMap`, and **bubble but are not composed**. A component that wraps another decides what to expose outside its own shadow root.
+- User closes of `ui-dialog` are **cancelable**, so a consumer can veto.
+
+## Consequences
+
+- Native events sometimes fire for our own changes too. `<details>` fires `toggle` a task after we set `open`. `ui-disclosure` has to recognise and drop that echo.
+- Two safeguards only matter for **scripted** events. The browser runs microtasks between listeners for real input, so Lit re-renders in between. Scripted `dispatchEvent` does not. `live()` and syncing the form value inside the handler are tested with scripted events for that reason.

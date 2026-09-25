@@ -1,0 +1,28 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Introduction" />
+
+# @maxaakre/ui
+
+A small, deep Lit component library. **Six components**, each held to the same bar:
+
+- behaviour, keyboard and axe tests in a real browser, each test checked by breaking the code it guards
+- stories for every state, in light and dark
+- an API table generated from the code (Custom Elements Manifest)
+- a **Guide** page: when *not* to use it, the decisions, the keyboard contract, and a screen-reader log
+
+| Component | Built on | The interesting part |
+|---|---|---|
+| Button | `<button>` | Form-associated, so `type="submit"` reaches a form outside the shadow root |
+| Text field | `<input>` | Label, hint and error must live *inside*: ID references don't cross shadow roots |
+| Checkbox | `<input type="checkbox">` | Controlled use, and a reset that survives reflection |
+| Disclosure | `<details>` | `open` synced both ways; events for the user only |
+| Tabs | light-DOM children | `aria-controls` needs one DOM tree; roles as attributes so test tools can see them |
+| Dialog | `<dialog>` + `showModal()` | Almost everything is the platform's; the tests prove it |
+
+Start with **Foundations → Tokens**, then **Decisions**.
+
+## Used by
+
+- **Daily Todo** (`apps/daily-todo`), a Lit app: the library was extracted from it
+- **React demo** (`apps/react-demo`), React 19, with tests for props, events and forms

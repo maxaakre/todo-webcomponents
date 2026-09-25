@@ -1,6 +1,6 @@
 {
   "name": "@maxaakre/ui",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "A small, deep Lit component library: accessible, typed, themeable.",
   "license": "MIT",
   "type": "module",
@@ -52,12 +52,13 @@
   },
   "files": [
     "dist",
-    "custom-elements.json"
+    "custom-elements.json",
+    "CHANGELOG.md"
   ],
   "customElements": "custom-elements.json",
   "scripts": {
     "build": "tsc -p tsconfig.build.json && node scripts/copy-css.js && pnpm manifest",
-    "manifest": "cem analyze --litelement --globs 'src/**/ui-*.ts' 'src/internal/form-control.ts' --exclude 'src/**/*.test.ts' --exclude 'src/**/*.stories.ts'",
+    "manifest": "cem analyze",
     "typecheck": "tsc --noEmit",
     "lint": "node scripts/lint.js",
     "test": "vitest run",
@@ -79,6 +80,7 @@
     "lit": "^3.3.3",
     "lit-analyzer": "^2.0.3",
     "playwright": "^1.63.0",
+    "remark-gfm": "^4.0.1",
     "storybook": "^10.6.0",
     "typescript": "~6.0.3",
     "vite": "^8.3.0",

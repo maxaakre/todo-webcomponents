@@ -5,5 +5,8 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["daily-todo"]
+  "ignore": [
+    "daily-todo",
+    "react-demo"
+  ]
 }

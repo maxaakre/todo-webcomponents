@@ -33,6 +33,9 @@ const preview: Preview = {
   parameters: {
     // Fail the a11y panel loudly rather than just listing warnings.
     a11y: { test: 'error' },
+    options: {
+      storySort: { order: ['Introduction', 'Foundations', 'Components', ['*', ['Guide', 'Docs', '*']], 'Decisions'] },
+    },
   },
 };
 

@@ -1,0 +1,21 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Decisions/0001 Platform first" />
+
+# 0001 · Wrap native elements before writing ARIA
+
+**Status:** accepted
+
+## Context
+
+Each component could be built from `<div>`s with hand-written roles, key handling and focus management. Or it could wrap the native element that already does the job.
+
+## Decision
+
+Wrap the native element whenever one exists: `<button>`, `<input>`, `<details>`, `<dialog>`. Write ARIA only where HTML has no element for the pattern (tabs).
+
+## Consequences
+
+- Keyboard support, focus, and screen-reader output come from the browser, tested by every browser vendor.
+- **Code got deleted, twice.** A disabled-click guard in `ui-button` and a focus-return routine in `ui-dialog` both turned out to do nothing: the platform already did it. Mutation tests found them. Two tests now guard the *platform's* behaviour instead.
+- We inherit native limits. For example, a native modal does not loop Tab; focus may leave to the browser's own UI.

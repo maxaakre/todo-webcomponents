@@ -1,0 +1,27 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Decisions/0003 Tabs in the light DOM, roles as attributes" />
+
+# 0003 · Tabs in the light DOM, with roles as attributes
+
+**Status:** accepted (second version)
+
+## Context
+
+Tabs need `aria-controls` (tab → panel) and `aria-labelledby` (panel → tab). Both are **ID references**, and ID references do not cross shadow-root boundaries.
+
+## Decision
+
+1. `ui-tab` and `ui-tab-panel` are **light-DOM children** of `ui-tabs`. Only the `tablist` wrapper is in its shadow root; the tabs are slotted into it.
+2. Roles are set as **attributes** (`role`, `aria-selected`), never overwriting a role the consumer set.
+
+## Why not `ElementInternals`?
+
+The first version set roles through `internals.role`, which keeps the host's attributes clean. Browsers read it. **Playwright's `getByRole`, Testing Library and axe did not**: they compute roles from attributes. The tabs were invisible to them.
+
+In a design system, that cost lands on every consuming team's test suite. Clean markup was not worth that.
+
+## Consequences
+
+- `ui-tab` adds `slot="tab"` and `role` to itself: attributes the consumer did not write.
+- Consumers find tabs with `getByRole('tab')`, like native ones.

@@ -38,6 +38,7 @@ Then open **http://localhost:5173/**.
 | Command | Does |
 |---|---|
 | `pnpm dev` | Dev server with hot reload |
+| `pnpm storybook` | The component library's Storybook |
 | `pnpm build` | Typecheck (`tsc`) then bundle (`vite build`), for every workspace package |
 | `pnpm preview` | Serve the production build locally |
 | `pnpm test` | Run the test suite once |
@@ -48,7 +49,8 @@ Then open **http://localhost:5173/**.
 A pnpm workspace. Run every command from the repo root.
 
 - **`apps/daily-todo/`** — the app
-- **`packages/`** — the component library (in progress, see [the spec](./docs/superpowers/specs/2026-09-25-ui-library-design.md))
+- **`packages/ui/`** — `@maxaakre/ui` 0.1.0, the component library pulled out of this app: 6 components, Storybook, tokens. See [its README](./packages/ui/README.md) and [the spec](./docs/superpowers/specs/2026-09-25-ui-library-design.md)
+- **`apps/react-demo/`** — every component used from React 19, with tests
 
 ### Versions
 
